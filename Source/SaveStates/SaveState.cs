@@ -471,8 +471,22 @@ namespace DebugMod
         //Moving all HUD related code to here for clarity
         private void HUDFixes()
         {
+            GameObject? hudCanvas = GameCameras.instance?.hudCanvas?.gameObject;
+            if (hudCanvas != null)
+            {
+                hudCanvas.SetActive(true);
 
-            GameCameras.instance.hudCanvas.gameObject.SetActive(true);
+                // THK final-blow can leave HUD Canvas::Slide Out latched "Out".
+                // Load-state should mirror bench get-off behavior by forcing HUD back "In".
+                if (GameManager.instance != null && GameManager.instance.IsGameplayScene())
+                {
+                    PlayMakerFSM hudSlideFsm = hudCanvas.LocateMyFSM("Slide Out");
+                    if (hudSlideFsm != null)
+                    {
+                        hudSlideFsm.SendEvent("IN");
+                    }
+                }
+            }
 
             HeroController.instance.geoCounter.geoTextMesh.text = data.savedPd.geo.ToString();
 
