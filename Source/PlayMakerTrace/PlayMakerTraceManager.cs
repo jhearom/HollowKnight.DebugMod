@@ -62,6 +62,7 @@ namespace DebugMod.PlayMakerTrace
             _sessionId = Guid.NewGuid().ToString("N");
             _configPath = Path.Combine(DebugMod.settings.ModBaseDirectory, "pmtrace_config.json");
             LoadConfig();
+            EnsureWindowsTemplateExists();
             Hook();
             _initialized = true;
 
@@ -159,6 +160,52 @@ namespace DebugMod.PlayMakerTrace
             foreach (string line in GetStatusLines())
             {
                 Console.AddLine(line);
+            }
+        }
+
+        internal static string DumpStatusSnapshot()
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            string outputDir = ResolveOutputDirectory();
+            Directory.CreateDirectory(outputDir);
+
+            string stamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss_fff", CultureInfo.InvariantCulture);
+            string fileName = $"pmtrace_status_{stamp}_{_sessionId.Substring(0, 8)}.json";
+            string filePath = Path.Combine(outputDir, fileName);
+
+            object payload = new
+            {
+                session_id = _sessionId,
+                utc_timestamp = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
+                enabled = _enabled,
+                buffered_rows = _rows.Count,
+                dropped_rows = _droppedRows,
+                config_path = _configPath,
+                output_dir = outputDir,
+                filters = new
+                {
+                    scene_allowlist = _config.Filters.SceneAllowlist,
+                    game_object_filter = _config.Filters.GameObjectFilter,
+                    fsm_filter = _config.Filters.FsmFilter,
+                    event_filter = _config.Filters.EventFilter
+                }
+            };
+
+            try
+            {
+                File.WriteAllText(filePath, JsonConvert.SerializeObject(payload, Formatting.Indented), new UTF8Encoding(false));
+                Console.AddLine($"PM Trace status snapshot: {filePath}");
+                return filePath;
+            }
+            catch (Exception e)
+            {
+                DebugMod.instance.LogError("PM Trace status snapshot failed: " + e);
+                Console.AddLine("PM Trace status snapshot failed. Check ModLog for details.");
+                return "";
             }
         }
 
@@ -542,6 +589,66 @@ namespace DebugMod.PlayMakerTrace
             if (!Directory.Exists(baseDir))
             {
                 Directory.CreateDirectory(baseDir);
+            }
+        }
+
+        private static void EnsureWindowsTemplateExists()
+        {
+            string templatePath = Path.Combine(DebugMod.settings.ModBaseDirectory, "pmtrace_config.template.windows.json");
+            if (File.Exists(templatePath))
+            {
+                return;
+            }
+
+            PlayMakerTraceConfig template = new()
+            {
+                Enabled = false,
+                MaxRows = 20000,
+                Filters = new PlayMakerTraceFilterConfig
+                {
+                    SceneAllowlist = new List<string> { "level250" },
+                    GameObjectFilter = new PlayMakerTracePatternFilter
+                    {
+                        Mode = "contains",
+                        Value = "Zombie Miner 1 (3)",
+                        IgnoreCase = true
+                    },
+                    FsmFilter = new PlayMakerTracePatternFilter
+                    {
+                        Mode = "off",
+                        Value = "",
+                        IgnoreCase = true
+                    },
+                    EventFilter = new PlayMakerTracePatternFilter
+                    {
+                        Mode = "off",
+                        Value = "",
+                        IgnoreCase = true
+                    }
+                },
+                Snapshots = new PlayMakerTraceSnapshotConfig
+                {
+                    IncludeHeroSnapshot = true,
+                    IncludeFsmVars = true,
+                    FsmBoolAllowlist = new List<string> { "Activated", "In Position", "Hero In Range" },
+                    FsmIntAllowlist = new List<string>(),
+                    FsmFloatAllowlist = new List<string>()
+                },
+                Output = new PlayMakerTraceOutputConfig
+                {
+                    OutputDirOverride = "",
+                    FilePrefix = "pmtrace"
+                }
+            };
+
+            try
+            {
+                File.WriteAllText(templatePath, JsonConvert.SerializeObject(template, Formatting.Indented), new UTF8Encoding(false));
+                Console.AddLine("PM Trace wrote default Windows template config");
+            }
+            catch (Exception e)
+            {
+                DebugMod.instance.LogError("PM Trace template config write failed: " + e);
             }
         }
 

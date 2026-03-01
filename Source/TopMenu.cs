@@ -185,6 +185,7 @@ namespace DebugMod
             panel.GetPanel("PM Trace Panel").AddButton("Flush Trace", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 90f), Vector2.zero, _ => PlayMakerTraceManager.FlushToDisk(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Flush Trace", 9);
             panel.GetPanel("PM Trace Panel").AddButton("Reload Config", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 110f), Vector2.zero, _ => PlayMakerTraceManager.ReloadConfig(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Reload Config", 9);
             panel.GetPanel("PM Trace Panel").AddButton("Show Status", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 130f), Vector2.zero, _ => PlayMakerTraceManager.PrintStatus(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Show Status", 9);
+            panel.GetPanel("PM Trace Panel").AddButton("Dump Status", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 150f), Vector2.zero, _ => PlayMakerTraceManager.DumpStatusSnapshot(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Dump Status", 9);
 
             panel.FixRenderOrder();
         }

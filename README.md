@@ -44,11 +44,14 @@ Runtime controls (F1 Top Menu -> `PM Trace`):
 * Flush Trace
 * Reload Config
 * Show Status
+* Dump Status
 
 Config file:
 * `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.json`
 * If missing, it is created automatically with defaults.
 * Edit filters/output in this file, then use `Reload Config` in-game.
+* A starter template is also generated at:
+  `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.template.windows.json`
 
 Default output:
 * `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace\\pmtrace_<timestamp>_<session>.jsonl`
@@ -56,6 +59,7 @@ Default output:
 Notes:
 * JSONL rows include transition timing/state fields plus optional hero/FSM snapshots (allowlist-based).
 * `fixed_frame_count` is a sampled proxy based on `fixedTime / fixedDeltaTime`.
+* `Dump Status` writes a small JSON status snapshot into the PM trace output directory.
 ----------------------------------------------------------------------------------------
                              INSTALLATION (STEAM, WINDOWS)
 ----------------------------------------------------------------------------------------
