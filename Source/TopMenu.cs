@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using DebugMod.Canvas;
+using DebugMod.PlayMakerTrace;
 using JetBrains.Annotations;
 using Modding;
 using UnityEngine;
@@ -38,6 +39,7 @@ namespace DebugMod
             panel.AddButton("Items", GUIController.Instance.images["ButtonRect"], new Vector2(346f, 68f), Vector2.zero, _=>  panel.TogglePanel("Items Panel"), buttonRect, GUIController.Instance.trajanBold, "Items");
             panel.AddButton("Bosses", GUIController.Instance.images["ButtonRect"], new Vector2(446f, 68f), Vector2.zero, _=>  panel.TogglePanel("Bosses Panel"), buttonRect, GUIController.Instance.trajanBold, "Bosses");
             panel.AddButton("SaveStates", GUIController.Instance.images["ButtonRect"], new Vector2(546f, 68f), Vector2.zero, _ => panel.TogglePanel("SaveStates Panel"), buttonRect, GUIController.Instance.trajanBold, "SaveStates");
+            panel.AddButton("PM Trace", GUIController.Instance.images["ButtonRect"], new Vector2(646f, 28f), Vector2.zero, _ => panel.TogglePanel("PM Trace Panel"), buttonRect, GUIController.Instance.trajanBold, "PM Trace");
 
 
             //Dropdown panels
@@ -49,6 +51,7 @@ namespace DebugMod
             panel.AddPanel("DreamGate Panel", GUIController.Instance.images["DreamGateDropdownBG"], new Vector2(545f, 75f), Vector2.zero, new Rect(0, 0, GUIController.Instance.images["DreamGateDropdownBG"].width, GUIController.Instance.images["DreamGateDropdownBG"].height));
             panel.AddPanel("Other Panel", GUIController.Instance.images["DropdownBG"], new Vector2(445f, 75f), Vector2.zero, new Rect(0, 0, GUIController.Instance.images["DropdownBG"].width, GUIController.Instance.images["DropdownBG"].height));
             panel.AddPanel("SaveStates Panel", GUIController.Instance.images["DropdownBG"], new Vector2(545f, 75f), Vector2.zero, new Rect(0, 0, GUIController.Instance.images["DropdownBG"].width, 170f));
+            panel.AddPanel("PM Trace Panel", GUIController.Instance.images["DropdownBG"], new Vector2(645f, 75f), Vector2.zero, new Rect(0, 0, GUIController.Instance.images["DropdownBG"].width, 170f));
 
 
             //Cheats panel
@@ -174,6 +177,14 @@ namespace DebugMod
             panel.GetPanel("SaveStates Panel").AddButton("Scroll Left", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(-15f, 115f), Vector2.zero, PrevPageClicked, new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Left", 8);
             panel.GetPanel("SaveStates Panel").AddButton("Scroll Right", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(20f, 115f), Vector2.zero, NextPageClicked, new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Right", 8);
             panel.GetPanel("SaveStates Panel").AddButton("Load State On Death", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 145f), Vector2.zero, LoadOnDeathClicked, new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "State On Death", 9);
+
+            //PM Trace panel
+            panel.GetPanel("PM Trace Panel").AddButton("Enable Trace", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 30f), Vector2.zero, _ => PlayMakerTraceManager.Enable(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Enable Trace", 9);
+            panel.GetPanel("PM Trace Panel").AddButton("Disable Trace", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 50f), Vector2.zero, _ => PlayMakerTraceManager.Disable(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Disable Trace", 9);
+            panel.GetPanel("PM Trace Panel").AddButton("Clear Buffer", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 70f), Vector2.zero, _ => PlayMakerTraceManager.ClearBuffer(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Clear Buffer", 9);
+            panel.GetPanel("PM Trace Panel").AddButton("Flush Trace", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 90f), Vector2.zero, _ => PlayMakerTraceManager.FlushToDisk(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Flush Trace", 9);
+            panel.GetPanel("PM Trace Panel").AddButton("Reload Config", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 110f), Vector2.zero, _ => PlayMakerTraceManager.ReloadConfig(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Reload Config", 9);
+            panel.GetPanel("PM Trace Panel").AddButton("Show Status", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 130f), Vector2.zero, _ => PlayMakerTraceManager.PrintStatus(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Show Status", 9);
 
             panel.FixRenderOrder();
         }

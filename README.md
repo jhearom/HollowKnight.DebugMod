@@ -29,6 +29,34 @@
 * Disable the vignette drawn around the player
 * Change the time scale of the game
 ----------------------------------------------------------------------------------------
+                         PLAYMAKER RUNTIME TRACE (PM TRACE)
+----------------------------------------------------------------------------------------
+DebugMod includes an opt-in PlayMaker transition tracer for runtime analysis.
+
+Default behavior:
+* OFF by default
+* No gameplay behavior changes when OFF
+
+Runtime controls (F1 Top Menu -> `PM Trace`):
+* Enable Trace
+* Disable Trace
+* Clear Buffer
+* Flush Trace
+* Reload Config
+* Show Status
+
+Config file:
+* `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.json`
+* If missing, it is created automatically with defaults.
+* Edit filters/output in this file, then use `Reload Config` in-game.
+
+Default output:
+* `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace\\pmtrace_<timestamp>_<session>.jsonl`
+
+Notes:
+* JSONL rows include transition timing/state fields plus optional hero/FSM snapshots (allowlist-based).
+* `fixed_frame_count` is a sampled proxy based on `fixedTime / fixedDeltaTime`.
+----------------------------------------------------------------------------------------
                              INSTALLATION (STEAM, WINDOWS)
 ----------------------------------------------------------------------------------------
 1) Download the modding API from here: https://drive.google.com/open?id=0B_b9PFqx_PR9X1ZrWGFxUGdydTg

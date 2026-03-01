@@ -12,6 +12,7 @@ using MonoMod.ModInterop;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using GlobalEnums;
+using DebugMod.PlayMakerTrace;
 using JetBrains.Annotations;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -201,6 +202,7 @@ namespace DebugMod
             BossHandler.PopulateBossLists();
             GUIController.Instance.BuildMenus();
             SceneWatcher.Init();
+            PlayMakerTraceManager.Initialize();
 
             KeyBindLock = false;
             TimeScaleActive = false;
