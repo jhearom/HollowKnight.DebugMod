@@ -38,8 +38,7 @@ Default behavior:
 * No gameplay behavior changes when OFF
 
 Runtime controls (F1 Top Menu -> `PM Trace`):
-* Enable Trace
-* Disable Trace
+* Enable/Disable Trace (single toggle button based on current state)
 * Clear Buffer
 * Flush Trace
 * Reload Config
@@ -60,6 +59,7 @@ Notes:
 * JSONL rows include transition timing/state fields plus optional hero/FSM snapshots (allowlist-based).
 * `fixed_frame_count` is a sampled proxy based on `fixedTime / fixedDeltaTime`.
 * `Dump Status` writes a small JSON status snapshot into the PM trace output directory.
+* PM Trace now auto-flushes buffered rows when trace is disabled and on application quit (if new rows were captured since the last flush).
 ----------------------------------------------------------------------------------------
                              INSTALLATION (STEAM, WINDOWS)
 ----------------------------------------------------------------------------------------

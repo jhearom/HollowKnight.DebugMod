@@ -180,7 +180,7 @@ namespace DebugMod
 
             //PM Trace panel
             panel.GetPanel("PM Trace Panel").AddButton("Enable Trace", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 30f), Vector2.zero, _ => PlayMakerTraceManager.Enable(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Enable Trace", 9);
-            panel.GetPanel("PM Trace Panel").AddButton("Disable Trace", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 50f), Vector2.zero, _ => PlayMakerTraceManager.Disable(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Disable Trace", 9);
+            panel.GetPanel("PM Trace Panel").AddButton("Disable Trace", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 30f), Vector2.zero, _ => PlayMakerTraceManager.Disable(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Disable Trace", 9);
             panel.GetPanel("PM Trace Panel").AddButton("Clear Buffer", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 70f), Vector2.zero, _ => PlayMakerTraceManager.ClearBuffer(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Clear Buffer", 9);
             panel.GetPanel("PM Trace Panel").AddButton("Flush Trace", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 90f), Vector2.zero, _ => PlayMakerTraceManager.FlushToDisk(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Flush Trace", 9);
             panel.GetPanel("PM Trace Panel").AddButton("Reload Config", GUIController.Instance.images["ButtonRectEmpty"], new Vector2(5f, 110f), Vector2.zero, _ => PlayMakerTraceManager.ReloadConfig(), new Rect(0f, 0f, 80f, 20f), GUIController.Instance.trajanNormal, "Reload Config", 9);
@@ -298,6 +298,13 @@ namespace DebugMod
                     
                     i++;
                 }
+            }
+
+            if (panel.GetPanel("PM Trace Panel").active)
+            {
+                bool traceEnabled = PlayMakerTraceManager.IsEnabled;
+                panel.GetButton("Enable Trace", "PM Trace Panel").SetActive(!traceEnabled);
+                panel.GetButton("Disable Trace", "PM Trace Panel").SetActive(traceEnabled);
             }
         }
 

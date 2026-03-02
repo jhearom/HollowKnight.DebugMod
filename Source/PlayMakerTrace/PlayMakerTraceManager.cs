@@ -31,6 +31,7 @@ namespace DebugMod.PlayMakerTrace
 
         private static bool _initialized;
         private static bool _enabled;
+        private static bool _hasUnflushedRows;
         private static int _transitionHookDepth;
         private static int _droppedRows;
         private static string _sessionId = Guid.NewGuid().ToString("N");
@@ -96,6 +97,7 @@ namespace DebugMod.PlayMakerTrace
 
         internal static void Disable()
         {
+            AutoFlushIfNeeded("disable");
             _enabled = false;
             _config.Enabled = false;
             SaveConfig();
@@ -106,6 +108,7 @@ namespace DebugMod.PlayMakerTrace
         {
             _rows.Clear();
             _droppedRows = 0;
+            _hasUnflushedRows = false;
             Console.AddLine("PM Trace buffer cleared");
         }
 
@@ -143,6 +146,7 @@ namespace DebugMod.PlayMakerTrace
                     writer.WriteLine(JsonConvert.SerializeObject(row, _jsonSettings));
                 }
 
+                _hasUnflushedRows = false;
                 Console.AddLine($"PM Trace flush complete: {_rows.Count} rows -> {filePath}");
             }
             catch (Exception e)
@@ -153,6 +157,11 @@ namespace DebugMod.PlayMakerTrace
             }
 
             return filePath;
+        }
+
+        internal static void AutoFlushOnApplicationQuit()
+        {
+            AutoFlushIfNeeded("application quit");
         }
 
         internal static void PrintStatus()
@@ -327,6 +336,21 @@ namespace DebugMod.PlayMakerTrace
             }
 
             _rows.Add(row);
+            _hasUnflushedRows = true;
+        }
+
+        private static void AutoFlushIfNeeded(string reason)
+        {
+            if (!_initialized || !_hasUnflushedRows || _rows.Count == 0)
+            {
+                return;
+            }
+
+            string filePath = FlushToDisk();
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                Console.AddLine($"PM Trace auto-flush ({reason}) -> {filePath}");
+            }
         }
 
         private static void PopulateHeroSnapshot(PlayMakerTraceRecord row)

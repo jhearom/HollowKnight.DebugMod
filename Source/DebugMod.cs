@@ -318,6 +318,7 @@ namespace DebugMod
 
         private void SaveSettings()
         {
+            PlayMakerTraceManager.AutoFlushOnApplicationQuit();
             SaveGlobalSettings();
             instance.Log("Saved");
         }
