@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jhearom.github.io/HollowKnight.DebugMod/docs/pmtrace-record.schema.json",
+  "title": "DebugMod PM Trace Record",
+  "description": "Schema for each JSON object row in PM trace JSONL output files.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "scene_name",
+    "game_object",
+    "fsm_name",
+    "from_state",
+    "to_state",
+    "event_name",
+    "frame_count",
+    "fixed_frame_count",
+    "time",
+    "fixed_time",
+    "t_ft",
+    "unscaled_time",
+    "fixed_frame_source"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "Session identifier for this mod run."
+    },
+    "scene_name": {
+      "type": "string"
+    },
+    "game_object": {
+      "type": "string"
+    },
+    "fsm_name": {
+      "type": "string"
+    },
+    "from_state": {
+      "type": "string"
+    },
+    "to_state": {
+      "type": "string"
+    },
+    "event_name": {
+      "type": "string",
+      "description": "Transition trigger event, '__direct_set_state__', or '__unknown_event__'."
+    },
+    "frame_count": {
+      "type": "integer"
+    },
+    "fixed_frame_count": {
+      "type": "integer",
+      "description": "Proxy counter derived from fixedTime / fixedDeltaTime."
+    },
+    "time": {
+      "type": "number"
+    },
+    "fixed_time": {
+      "type": "number"
+    },
+    "t_ft": {
+      "type": "number",
+      "description": "time - fixed_time"
+    },
+    "unscaled_time": {
+      "type": "number"
+    },
+    "fixed_frame_source": {
+      "type": "string",
+      "const": "proxy_fixedTime_over_fixedDeltaTime"
+    },
+    "hero_state": {
+      "type": "string"
+    },
+    "hero_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controlReqlinquished",
+        "transition_state",
+        "cstate_transitioning",
+        "cstate_willHardLand",
+        "cstate_dead"
+      ],
+      "properties": {
+        "controlReqlinquished": {
+          "type": "boolean"
+        },
+        "transition_state": {
+          "type": "string"
+        },
+        "cstate_transitioning": {
+          "type": "boolean"
+        },
+        "cstate_willHardLand": {
+          "type": "boolean"
+        },
+        "cstate_dead": {
+          "type": "boolean"
+        }
+      }
+    },
+    "fsm_vars": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bools": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "ints": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "floats": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

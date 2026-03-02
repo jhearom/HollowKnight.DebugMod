@@ -1,0 +1,171 @@
+{
+  "artifact_version": "1.0.0",
+  "feature": "DebugMod PlayMaker Runtime Trace (PM Trace)",
+  "default_patch_scope": "1.5.78.11833",
+  "runtime_target": "Windows 11",
+  "development_environment": "Ubuntu 24.04",
+  "config": {
+    "primary_path": "%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.json",
+    "windows_template_path": "%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.template.windows.json",
+    "schema_path": "docs/pmtrace-config.schema.json",
+    "defaults": {
+      "enabled": false,
+      "maxRows": 50000,
+      "filters": {
+        "sceneAllowlist": [],
+        "gameObjectFilter": {
+          "mode": "off",
+          "value": "",
+          "ignoreCase": true
+        },
+        "fsmFilter": {
+          "mode": "off",
+          "value": "",
+          "ignoreCase": true
+        },
+        "eventFilter": {
+          "mode": "off",
+          "value": "",
+          "ignoreCase": true
+        }
+      },
+      "snapshots": {
+        "includeHeroSnapshot": true,
+        "includeFsmVars": true,
+        "fsmBoolAllowlist": [],
+        "fsmIntAllowlist": [],
+        "fsmFloatAllowlist": []
+      },
+      "output": {
+        "outputDirOverride": "",
+        "filePrefix": "pmtrace"
+      }
+    }
+  },
+  "capture": {
+    "hooks": [
+      {
+        "hook": "HutongGames.PlayMaker.Fsm.DoTransition",
+        "event_behavior": "captures transition event name when available"
+      },
+      {
+        "hook": "HutongGames.PlayMaker.Fsm.SetState",
+        "event_behavior": "captures direct state set when not nested under DoTransition",
+        "event_name": "__direct_set_state__"
+      }
+    ],
+    "event_name_fallback": "__unknown_event__",
+    "record_condition": "trace enabled and all active filters pass",
+    "filters": {
+      "all_must_match": true,
+      "sceneAllowlist": {
+        "match": "exact string",
+        "empty_behavior": "no scene filtering"
+      },
+      "pattern_filters": {
+        "targets": [
+          "gameObjectFilter",
+          "fsmFilter",
+          "eventFilter"
+        ],
+        "supported_modes": [
+          "off",
+          "exact",
+          "contains",
+          "regex"
+        ],
+        "ignore_case_supported": true,
+        "invalid_regex_behavior": "filter is disabled and warning is logged"
+      }
+    },
+    "buffering": {
+      "mode": "in-memory row buffer",
+      "max_rows_key": "maxRows",
+      "max_rows_behavior": "when full, new matching rows are dropped",
+      "dropped_counter": "dropped_rows",
+      "clear_buffer_resets_dropped_counter": true
+    },
+    "timestamps": {
+      "frame_count": "Unity Time.frameCount",
+      "fixed_frame_count": "proxy from fixedTime / fixedDeltaTime",
+      "fixed_frame_source": "proxy_fixedTime_over_fixedDeltaTime",
+      "time": "Unity Time.time",
+      "fixed_time": "Unity Time.fixedTime",
+      "t_ft": "time - fixed_time",
+      "unscaled_time": "Unity Time.unscaledTime"
+    },
+    "optional_snapshots": {
+      "hero_snapshot": {
+        "config_key": "snapshots.includeHeroSnapshot",
+        "fields": [
+          "hero_state",
+          "hero_flags.controlReqlinquished",
+          "hero_flags.transition_state",
+          "hero_flags.cstate_transitioning",
+          "hero_flags.cstate_willHardLand",
+          "hero_flags.cstate_dead"
+        ]
+      },
+      "fsm_variable_snapshot": {
+        "config_key": "snapshots.includeFsmVars",
+        "allowlists": {
+          "bools": "snapshots.fsmBoolAllowlist",
+          "ints": "snapshots.fsmIntAllowlist",
+          "floats": "snapshots.fsmFloatAllowlist"
+        },
+        "behavior": "only allowlisted variables present on FSM are emitted"
+      }
+    }
+  },
+  "output": {
+    "default_directory": "%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace",
+    "directory_override_key": "output.outputDirOverride",
+    "file_prefix_key": "output.filePrefix",
+    "trace_file_format": "JSONL",
+    "trace_file_pattern": "<filePrefix>_<yyyyMMdd_HHmmss_fff UTC>_<sessionId8>.jsonl",
+    "status_file_pattern": "pmtrace_status_<yyyyMMdd_HHmmss_fff UTC>_<sessionId8>.json",
+    "flush_triggers": [
+      "manual: Flush Trace",
+      "auto: Disable Trace (if unflushed rows exist)",
+      "auto: application quit hook (if unflushed rows exist)"
+    ],
+    "auto_flush_dedup": "no auto flush write when no new rows since last successful flush"
+  },
+  "ui_controls": [
+    "Enable Trace / Disable Trace (single visible toggle based on state)",
+    "Clear Buffer",
+    "Flush Trace",
+    "Reload Config",
+    "Show Status",
+    "Dump Status"
+  ],
+  "status_outputs": {
+    "show_status_lines": [
+      "enabled / buffered row count / dropped row count",
+      "config path",
+      "resolved output directory",
+      "active filters summary"
+    ],
+    "dump_status_json_fields": [
+      "session_id",
+      "utc_timestamp",
+      "enabled",
+      "buffered_rows",
+      "dropped_rows",
+      "config_path",
+      "output_dir",
+      "filters.scene_allowlist",
+      "filters.game_object_filter",
+      "filters.fsm_filter",
+      "filters.event_filter"
+    ]
+  },
+  "schemas": {
+    "config_schema": "docs/pmtrace-config.schema.json",
+    "record_schema": "docs/pmtrace-record.schema.json"
+  },
+  "record_notes": [
+    "See docs/pmtrace-record.schema.json for full row contract.",
+    "All rows include session_id to correlate files and runs."
+  ]
+}

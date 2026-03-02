@@ -51,6 +51,11 @@ Config file:
 * Edit filters/output in this file, then use `Reload Config` in-game.
 * A starter template is also generated at:
   `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.template.windows.json`
+* Machine-readable contract artifacts for tooling/analysis:
+  * `docs/pmtrace-capabilities.json`
+  * `docs/pmtrace-config.schema.json`
+  * `docs/pmtrace-record.schema.json`
+  * `docs/pmtrace-analysis-prompt-template.md`
 
 Default output:
 * `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace\\pmtrace_<timestamp>_<session>.jsonl`
