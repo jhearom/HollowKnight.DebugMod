@@ -143,7 +143,7 @@ namespace DebugMod.PlayMakerTrace
                 }
 
                 _hasUnflushedRows = false;
-                Console.AddLine($"PM Trace flush complete: {_rows.Count} rows -> {filePath}");
+                Console.AddLine($"PM Trace flush complete: {_rows.Count} rows -> {NormalizePathForStatus(filePath)}");
             }
             catch (Exception e)
             {
@@ -189,8 +189,8 @@ namespace DebugMod.PlayMakerTrace
                 enabled = _enabled,
                 buffered_rows = _rows.Count,
                 dropped_rows = _droppedRows,
-                config_path = _configPath,
-                output_dir = outputDir,
+                config_path = NormalizePathForStatus(_configPath),
+                output_dir = NormalizePathForStatus(outputDir),
                 filters = new
                 {
                     scene_allowlist = _config.Filters.SceneAllowlist,
@@ -203,7 +203,7 @@ namespace DebugMod.PlayMakerTrace
             try
             {
                 File.WriteAllText(filePath, JsonConvert.SerializeObject(payload, Formatting.Indented), new UTF8Encoding(false));
-                Console.AddLine($"PM Trace status snapshot: {filePath}");
+                Console.AddLine($"PM Trace status snapshot: {NormalizePathForStatus(filePath)}");
                 return filePath;
             }
             catch (Exception e)
@@ -223,8 +223,8 @@ namespace DebugMod.PlayMakerTrace
             return new List<string>
             {
                 $"PM Trace status: enabled={_enabled}, rows={_rows.Count}, dropped={_droppedRows}",
-                $"PM Trace config: {_configPath}",
-                $"PM Trace output dir: {ResolveOutputDirectory()}",
+                $"PM Trace config: {NormalizePathForStatus(_configPath)}",
+                $"PM Trace output dir: {NormalizePathForStatus(ResolveOutputDirectory())}",
                 $"PM Trace filters: scene={sceneFilter}, go={DescribeFilter(_gameObjectFilter)}, fsm={DescribeFilter(_fsmFilter)}, event={DescribeFilter(_eventFilter)}"
             };
         }
@@ -700,6 +700,23 @@ namespace DebugMod.PlayMakerTrace
             }
 
             return output.ToString().Trim();
+        }
+
+        private static string NormalizePathForStatus(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return path ?? "";
+            }
+
+            char separator = Path.DirectorySeparatorChar;
+            char altSeparator = Path.AltDirectorySeparatorChar;
+            if (separator != altSeparator)
+            {
+                return path.Replace(altSeparator, separator);
+            }
+
+            return path;
         }
 
         private static void NormalizeConfig()
