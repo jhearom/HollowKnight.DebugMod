@@ -37,7 +37,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ./Source/DebugMod.csproj
       - name: Build Mod
-        run: dotnet build ./Source/DebugMod.csproj -c Release -p:HollowKnightFolder="$GITHUB_WORKSPACE/API"
+        run: dotnet build ./Source/DebugMod.csproj -c Release -p:HollowKnightFolder="$GITHUB_WORKSPACE/API" -p:OutputDirectory="$GITHUB_WORKSPACE"
       - name: Copy Files
         run: |
           cp ./Source/bin/Release/DebugMod.dll ./Source/
