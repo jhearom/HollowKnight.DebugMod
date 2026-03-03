@@ -35,6 +35,7 @@ DebugMod includes an opt-in PlayMaker transition tracer for runtime analysis.
 
 Default behavior:
 * OFF by default
+* Always starts OFF on launch (no auto-enable from prior session state)
 * No gameplay behavior changes when OFF
 
 Runtime controls (F1 Top Menu -> `PM Trace`):
@@ -65,6 +66,7 @@ Notes:
 * `fixed_frame_count` is a sampled proxy based on `fixedTime / fixedDeltaTime`.
 * `Dump Status` writes a small JSON status snapshot into the PM trace output directory.
 * PM Trace now auto-flushes buffered rows when trace is disabled and on application quit (if new rows were captured since the last flush).
+* `enabled` in `pmtrace_config.json` is retained for compatibility, but launch/reload policy forces PM Trace runtime state to disabled.
 ----------------------------------------------------------------------------------------
                              INSTALLATION (STEAM, WINDOWS)
 ----------------------------------------------------------------------------------------

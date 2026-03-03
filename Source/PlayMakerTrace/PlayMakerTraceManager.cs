@@ -90,8 +90,6 @@ namespace DebugMod.PlayMakerTrace
             }
 
             _enabled = true;
-            _config.Enabled = true;
-            SaveConfig();
             Console.AddLine("PM Trace enabled");
         }
 
@@ -99,8 +97,6 @@ namespace DebugMod.PlayMakerTrace
         {
             AutoFlushIfNeeded("disable");
             _enabled = false;
-            _config.Enabled = false;
-            SaveConfig();
             Console.AddLine("PM Trace disabled");
         }
 
@@ -519,7 +515,15 @@ namespace DebugMod.PlayMakerTrace
             }
 
             NormalizeConfig();
-            _enabled = _config.Enabled;
+            // PM Trace startup policy: always initialize disabled, regardless of prior config state.
+            // Keep the config field for compatibility, but normalize persisted value to false.
+            bool normalizedEnabled = _config.Enabled;
+            _enabled = false;
+            _config.Enabled = false;
+            if (normalizedEnabled)
+            {
+                SaveConfig();
+            }
             CompileFilters();
         }
 

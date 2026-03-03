@@ -16,7 +16,7 @@
     "enabled": {
       "type": "boolean",
       "default": false,
-      "description": "Whether PM trace capture is enabled."
+      "description": "Compatibility field. PM Trace runtime startup/reload policy forces disabled state; enable/disable is controlled in-session via UI."
     },
     "maxRows": {
       "type": "integer",

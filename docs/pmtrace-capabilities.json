@@ -40,6 +40,12 @@
         "outputDirOverride": "",
         "filePrefix": "pmtrace"
       }
+    },
+    "runtime_enabled_policy": {
+      "launch_state": "forced_disabled",
+      "reload_state": "forced_disabled",
+      "persistence": "enable/disable UI actions do not persist enabled state across launches",
+      "compatibility_note": "config.enabled is retained for compatibility but normalized to false at runtime load."
     }
   },
   "capture": {
