@@ -46,7 +46,7 @@ jobs:
           cp ./Source/bin/Release/DebugMod.pdb ./Source/
           cp ./Source/bin/Release/DebugMod.xml ./Source/
       - name: Upload Mod
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: DebugMod
           path: |
@@ -64,7 +64,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.should_release == 'true'
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
       - name: Get build details
