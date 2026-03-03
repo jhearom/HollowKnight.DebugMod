@@ -35,9 +35,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ./Source/DebugMod.csproj
       - name: Build Mod
-        run: dotnet build -c Release
+        run: dotnet build ./Source/DebugMod.csproj -c Release -p:HollowKnightFolder=./API
       - name: Copy Files
         run: |
           cp ./Source/bin/Release/DebugMod.dll ./Source/
