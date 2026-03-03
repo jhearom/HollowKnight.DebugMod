@@ -296,3 +296,10 @@ __pycache__/
 Source/*.zip
 Source/SHA.txt
 Source/VERSION.txt
+
+# Local agent instructions/state (keep local-only)
+AGENTS.md
+**/AGENTS.md
+.codex/
+.cursor/
+.aider*

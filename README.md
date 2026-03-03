@@ -29,6 +29,45 @@
 * Disable the vignette drawn around the player
 * Change the time scale of the game
 ----------------------------------------------------------------------------------------
+                         PLAYMAKER RUNTIME TRACE (PM TRACE)
+----------------------------------------------------------------------------------------
+DebugMod includes an opt-in PlayMaker transition tracer for runtime analysis.
+
+Default behavior:
+* OFF by default
+* Always starts OFF on launch (no auto-enable from prior session state)
+* No gameplay behavior changes when OFF
+
+Runtime controls (F1 Top Menu -> `PM Trace`):
+* Enable/Disable Trace (single toggle button based on current state)
+* Clear Buffer
+* Flush Trace
+* Reload Config
+* Show Status
+* Dump Status
+
+Config file:
+* `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.json`
+* If missing, it is created automatically with defaults.
+* Edit filters/output in this file, then use `Reload Config` in-game.
+* A starter template is also generated at:
+  `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.template.windows.json`
+* Machine-readable contract artifacts for tooling/analysis:
+  * `docs/pmtrace-capabilities.json`
+  * `docs/pmtrace-config.schema.json`
+  * `docs/pmtrace-record.schema.json`
+  * `docs/pmtrace-analysis-prompt-template.md`
+
+Default output:
+* `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace\\pmtrace_<timestamp>_<session>.jsonl`
+
+Notes:
+* JSONL rows include transition timing/state fields plus optional hero/FSM snapshots (allowlist-based).
+* `fixed_frame_count` is a sampled proxy based on `fixedTime / fixedDeltaTime`.
+* `Dump Status` writes a small JSON status snapshot into the PM trace output directory.
+* PM Trace now auto-flushes buffered rows when trace is disabled and on application quit (if new rows were captured since the last flush).
+* `enabled` in `pmtrace_config.json` is retained for compatibility, but launch/reload policy forces PM Trace runtime state to disabled.
+----------------------------------------------------------------------------------------
                              INSTALLATION (STEAM, WINDOWS)
 ----------------------------------------------------------------------------------------
 1) Download the modding API from here: https://drive.google.com/open?id=0B_b9PFqx_PR9X1ZrWGFxUGdydTg

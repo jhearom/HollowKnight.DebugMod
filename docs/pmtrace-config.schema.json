@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jhearom.github.io/HollowKnight.DebugMod/docs/pmtrace-config.schema.json",
+  "title": "DebugMod PM Trace Config",
+  "description": "Schema for DebugMod PlayMaker runtime trace configuration file (pmtrace_config.json).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "enabled",
+    "maxRows",
+    "filters",
+    "snapshots",
+    "output"
+  ],
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Compatibility field. PM Trace runtime startup/reload policy forces disabled state; enable/disable is controlled in-session via UI."
+    },
+    "maxRows": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 50000,
+      "description": "Maximum buffered rows retained before new matching rows are dropped."
+    },
+    "filters": {
+      "$ref": "#/$defs/filters"
+    },
+    "snapshots": {
+      "$ref": "#/$defs/snapshots"
+    },
+    "output": {
+      "$ref": "#/$defs/output"
+    }
+  },
+  "$defs": {
+    "patternFilter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "value",
+        "ignoreCase"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "off",
+            "exact",
+            "contains",
+            "regex"
+          ],
+          "default": "off",
+          "description": "Filter mode. Invalid/unknown values are treated as off by implementation."
+        },
+        "value": {
+          "type": "string",
+          "default": "",
+          "description": "Match value for exact/contains/regex modes."
+        },
+        "ignoreCase": {
+          "type": "boolean",
+          "default": true,
+          "description": "Case-insensitive matching toggle for exact/contains/regex."
+        }
+      }
+    },
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sceneAllowlist",
+        "gameObjectFilter",
+        "fsmFilter",
+        "eventFilter"
+      ],
+      "properties": {
+        "sceneAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Exact scene-name allowlist; empty array disables scene filtering."
+        },
+        "gameObjectFilter": {
+          "$ref": "#/$defs/patternFilter"
+        },
+        "fsmFilter": {
+          "$ref": "#/$defs/patternFilter"
+        },
+        "eventFilter": {
+          "$ref": "#/$defs/patternFilter"
+        }
+      }
+    },
+    "snapshots": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "includeHeroSnapshot",
+        "includeFsmVars",
+        "fsmBoolAllowlist",
+        "fsmIntAllowlist",
+        "fsmFloatAllowlist"
+      ],
+      "properties": {
+        "includeHeroSnapshot": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include hero_state and hero_flags fields when available."
+        },
+        "includeFsmVars": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include allowlisted FSM variable snapshot fields when available."
+        },
+        "fsmBoolAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "FSM bool variable names to capture."
+        },
+        "fsmIntAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "FSM int variable names to capture."
+        },
+        "fsmFloatAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "FSM float variable names to capture."
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outputDirOverride",
+        "filePrefix"
+      ],
+      "properties": {
+        "outputDirOverride": {
+          "type": "string",
+          "default": "",
+          "description": "Optional absolute/relative directory path override for output files. Empty uses default DebugModData\\pmtrace."
+        },
+        "filePrefix": {
+          "type": "string",
+          "default": "pmtrace",
+          "description": "Prefix used when naming JSONL trace files."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "enabled": false,
+      "maxRows": 50000,
+      "filters": {
+        "sceneAllowlist": [
+          "level250"
+        ],
+        "gameObjectFilter": {
+          "mode": "contains",
+          "value": "Zombie Miner 1 (3)",
+          "ignoreCase": true
+        },
+        "fsmFilter": {
+          "mode": "off",
+          "value": "",
+          "ignoreCase": true
+        },
+        "eventFilter": {
+          "mode": "off",
+          "value": "",
+          "ignoreCase": true
+        }
+      },
+      "snapshots": {
+        "includeHeroSnapshot": true,
+        "includeFsmVars": true,
+        "fsmBoolAllowlist": [
+          "Activated",
+          "In Position",
+          "Hero In Range"
+        ],
+        "fsmIntAllowlist": [],
+        "fsmFloatAllowlist": []
+      },
+      "output": {
+        "outputDirOverride": "",
+        "filePrefix": "pmtrace"
+      }
+    }
+  ]
+}
