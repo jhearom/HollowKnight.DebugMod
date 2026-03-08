@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DebugMod.MethodHelpers;
 using UnityEngine;
 
 namespace DebugMod.Hitbox
@@ -24,7 +25,7 @@ namespace DebugMod.Hitbox
             Compass = new GameObject(
                 "Compass", 
                 typeof(SpriteRenderer));
-            DontDestroyOnLoad(Compass);
+            PersistenceHelper.DontDestroyOnLoadRoot(Compass);
             
             //right arrow was used because the arctan calculates angle relative to +x so using the right arrow means no extra correction
             Texture2D texture = GUIController.Instance.images["ScrollBarArrowRight"];

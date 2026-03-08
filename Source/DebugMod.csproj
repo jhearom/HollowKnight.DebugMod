@@ -12,6 +12,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>CS1591</NoWarn>
 	<Nullable>enable</Nullable>
+    <ModdingApiFolder Condition="'$(ModdingApiFolder)' == ''">$(HollowKnightFolder)</ModdingApiFolder>
   </PropertyGroup>
 
 	<!-- Create a LocalBuildProperties.props file which defines HollowKnightFolder (references dir) 
@@ -29,7 +30,7 @@
  <!-- Same References -->
     <ItemGroup>
         <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>$(HollowKnightFolder)\Assembly-CSharp.dll</HintPath>
+          <HintPath>$(ModdingApiFolder)\Assembly-CSharp.dll</HintPath>
         </Reference>
         <Reference Include="Mono.Cecil, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
           <HintPath>$(HollowKnightFolder)\Mono.Cecil.dll</HintPath>
@@ -75,18 +76,21 @@
         </Reference>
 		
         <Reference Include="MMHOOK_Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(HollowKnightFolder)\MMHOOK_Assembly-CSharp.dll</HintPath>
+            <HintPath>$(ModdingApiFolder)\MMHOOK_Assembly-CSharp.dll</HintPath>
         </Reference>
         <Reference Include="MMHOOK_PlayMaker, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>$(HollowKnightFolder)\MMHOOK_PlayMaker.dll</HintPath>
         </Reference>
-        <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="Newtonsoft.Json">
             <HintPath>$(HollowKnightFolder)\Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="TeamCherry.TK2D, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>$(HollowKnightFolder)\TeamCherry.TK2D.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>$(HollowKnightFolder)\UnityEngine.InputLegacyModule.dll</HintPath>
         </Reference>
-        <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+        <Reference Include="netstandard">
             <HintPath>$(HollowKnightFolder)\netstandard.dll</HintPath>
         </Reference>
         <Reference Include="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">

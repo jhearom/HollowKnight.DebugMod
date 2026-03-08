@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using DebugMod.MethodHelpers;
 using DebugMod.Hitbox;
 using UnityEngine;
 using UnityEngine.UI;
@@ -64,7 +65,7 @@ namespace DebugMod
             Modding.ModHooks.FinishedLoadingModsHook += () => InfoPanel.BuildInfoPanels(canvas);
             Modding.ModHooks.FinishedLoadingModsHook += () => KeyBindPanel.BuildMenu(canvas);
 
-            DontDestroyOnLoad(canvas);
+            PersistenceHelper.DontDestroyOnLoadRoot(canvas);
         }
 
         private void LoadResources()
@@ -112,7 +113,7 @@ namespace DebugMod
                         imageStream.Read(buffer, 0, buffer.Length);
 
                         Texture2D tex = new Texture2D(1, 1);
-                        tex.LoadImage(buffer.ToArray());
+                        TextureCompat.LoadImage(tex, buffer.ToArray());
 
                         string[] split = res.Split('.');
                         string internalName = split[split.Length - 2];
@@ -362,7 +363,7 @@ namespace DebugMod
 
                         GameObject GUIObj = new GameObject();
                         _instance = GUIObj.AddComponent<GUIController>();
-                        DontDestroyOnLoad(GUIObj);
+                        PersistenceHelper.DontDestroyOnLoadRoot(GUIObj);
                     }
                 }
                 return _instance;

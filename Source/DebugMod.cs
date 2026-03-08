@@ -7,6 +7,7 @@ using System.Collections;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using DebugMod.MethodHelpers;
 using Modding;
 using MonoMod.ModInterop;
 using UnityEngine;
@@ -178,7 +179,7 @@ namespace DebugMod
             UnityEngine.SceneManagement.SceneManager.activeSceneChanged += LevelActivated;
             GameObject UIObj = new GameObject();
             UIObj.AddComponent<GUIController>();
-            Object.DontDestroyOnLoad(UIObj);
+            PersistenceHelper.DontDestroyOnLoadRoot(UIObj);
             
             saveStateManager = new SaveStateManager();
             ModHooks.AfterSavegameLoadHook += LoadCharacter;
@@ -213,16 +214,6 @@ namespace DebugMod
 
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
-            Panth1Prefab = preloadedObjects["GG_Atrium"]["GG_Challenge_Door (1)"];
-            Panth2Prefab = preloadedObjects["GG_Atrium"]["GG_Challenge_Door (2)"];
-            Panth3Prefab = preloadedObjects["GG_Atrium"]["GG_Challenge_Door (3)"];
-            Panth4Prefab = preloadedObjects["GG_Atrium"]["GG_Challenge_Door (4)"];
-            Panth5Prefab = preloadedObjects["GG_Atrium_Roof"]["GG_Final_Challenge_Door"];
-            Object.DontDestroyOnLoad(Panth1Prefab);
-            Object.DontDestroyOnLoad(Panth2Prefab);
-            Object.DontDestroyOnLoad(Panth3Prefab);
-            Object.DontDestroyOnLoad(Panth4Prefab);
-            Object.DontDestroyOnLoad(Panth5Prefab);
             base.Initialize(preloadedObjects);
         }
 
@@ -245,7 +236,7 @@ namespace DebugMod
             OpenedSave = false;
             if (chooser != 1) return;
             GameObject DebugEasterEgg = new GameObject("DebugEasterEgg");
-            Object.DontDestroyOnLoad(DebugEasterEgg);
+            PersistenceHelper.DontDestroyOnLoadRoot(DebugEasterEgg);
 
             On.SetVersionNumber.Start += ChangeVersionNumber;
             On.MenuStyleTitle.SetTitle += FixMenuTitle;
@@ -270,7 +261,7 @@ namespace DebugMod
                 {
                     byte[] bytes = new byte[stream.Length];
                     stream.Read(bytes, 0, bytes.Length);
-                    RealTitle_texture.LoadImage(bytes, false);
+                    TextureCompat.LoadImage(RealTitle_texture, bytes, false);
                     RealTitle_texture.name = "SilkNever";
                 }
 
@@ -326,14 +317,7 @@ namespace DebugMod
         //preloading required for pantheon savestates
         public override List<(string, string)> GetPreloadNames()
         {
-            return new List<(string, string)>
-            {
-                ("GG_Atrium", "GG_Challenge_Door (1)"),
-                ("GG_Atrium", "GG_Challenge_Door (2)"),
-                ("GG_Atrium", "GG_Challenge_Door (3)"),
-                ("GG_Atrium", "GG_Challenge_Door (4)"),
-                ("GG_Atrium_Roof", "GG_Final_Challenge_Door"),
-        };
+            return new List<(string, string)>();
         }
 
         private int PlayerDamaged(int damageAmount)
@@ -356,9 +340,9 @@ namespace DebugMod
             return CurrentHazardCoro;
         }
 
-        public static IEnumerator OnInvulnerable(On.HeroController.orig_Invulnerable orig, HeroController self, float duration)
+        public static IEnumerator OnInvulnerable(On.HeroController.orig_Invulnerable orig, HeroController self)
         {
-            CurrentInvulnCoro = orig(self, duration);
+            CurrentInvulnCoro = orig(self);
             return CurrentInvulnCoro;
         }
         private void NewCharacter() => LoadCharacter(null);

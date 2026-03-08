@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DebugMod.MethodHelpers;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace DebugMod.Canvas
@@ -43,7 +44,7 @@ namespace DebugMod.Canvas
             textTransform.anchorMin = position;
             textTransform.anchorMax = position;
 
-            Object.DontDestroyOnLoad(textObj);
+            PersistenceHelper.DontDestroyOnLoadRoot(textObj);
 
             active = true;
         }

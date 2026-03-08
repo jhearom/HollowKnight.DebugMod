@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DebugMod.MethodHelpers;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 
@@ -39,7 +40,7 @@ namespace DebugMod.Canvas
             buttonTransform.anchorMin = position;
             buttonTransform.anchorMax = position;
 
-            Object.DontDestroyOnLoad(buttonObj);
+            PersistenceHelper.DontDestroyOnLoadRoot(buttonObj);
 
             if (font != null && text != null)
             {
@@ -52,7 +53,7 @@ namespace DebugMod.Canvas
                 t.alignment = TextAnchor.MiddleCenter;
                 textObj.transform.SetParent(buttonObj.transform, false);
 
-                Object.DontDestroyOnLoad(textObj);
+                PersistenceHelper.DontDestroyOnLoadRoot(textObj);
             }
 
             active = true;

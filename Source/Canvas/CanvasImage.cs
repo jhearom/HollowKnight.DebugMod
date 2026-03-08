@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DebugMod.MethodHelpers;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace DebugMod.Canvas
@@ -39,7 +40,7 @@ namespace DebugMod.Canvas
             imageTransform.SetScaleX(size.x / subSprite.width);
             imageTransform.SetScaleY(size.y / subSprite.height);
 
-            Object.DontDestroyOnLoad(imageObj);
+            PersistenceHelper.DontDestroyOnLoadRoot(imageObj);
 
             active = true;
         }
