@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jhearom.github.io/HollowKnight.DebugMod/docs/pmtrace-command-contract.json",
+  "title": "DebugMod PM Trace Command Contract",
+  "description": "Machine-facing command contract for DebugExport.ExecutePmTraceCommand.",
+  "entrypoints": {
+    "execute": "DebugExport.ExecutePmTraceCommand(string commandLine)",
+    "help": "DebugExport.GetPmTraceCommandHelp()"
+  },
+  "command_prefix": {
+    "optional": true,
+    "value": "pmtrace",
+    "examples": [
+      "pmtrace enable",
+      "enable"
+    ]
+  },
+  "commands": [
+    {
+      "name": "help",
+      "forms": [
+        "pmtrace help",
+        "pmtrace --help",
+        "pmtrace -h"
+      ]
+    },
+    {
+      "name": "enable"
+    },
+    {
+      "name": "disable"
+    },
+    {
+      "name": "clear"
+    },
+    {
+      "name": "flush"
+    },
+    {
+      "name": "reload"
+    },
+    {
+      "name": "status"
+    },
+    {
+      "name": "dump_status",
+      "aliases": [
+        "dump-status"
+      ]
+    },
+    {
+      "name": "profiles list"
+    },
+    {
+      "name": "profile activate <name>"
+    }
+  ],
+  "response_json": {
+    "type": "object",
+    "required": [
+      "ok",
+      "code",
+      "message"
+    ],
+    "properties": {
+      "ok": {
+        "type": "boolean"
+      },
+      "code": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      },
+      "data": {
+        "description": "Optional command-specific payload."
+      }
+    }
+  },
+  "status_payload": {
+    "fields": [
+      "lines",
+      "enabled",
+      "active_profile",
+      "row_count",
+      "dropped_rows"
+    ]
+  },
+  "profiles_list_payload": {
+    "fields": [
+      "active_profile",
+      "profiles"
+    ]
+  },
+  "error_codes": [
+    "empty_command",
+    "unknown_command",
+    "unknown_subcommand",
+    "missing_subcommand",
+    "missing_argument",
+    "invalid_profile_name",
+    "profile_not_found",
+    "command_exception"
+  ],
+  "examples": [
+    {
+      "command": "pmtrace profile activate shriek_hitgate",
+      "response": {
+        "ok": true,
+        "code": "profile_activated",
+        "message": "Activated profile 'shriek_hitgate'.",
+        "data": {
+          "active_profile": "shriek_hitgate"
+        }
+      }
+    },
+    {
+      "command": "pmtrace profiles list",
+      "response": {
+        "ok": true,
+        "code": "profiles_list",
+        "message": "PM Trace profiles listed.",
+        "data": {
+          "active_profile": "default_fsm",
+          "profiles": [
+            "combat_minimal",
+            "default_fsm",
+            "shriek_hitgate"
+          ]
+        }
+      }
+    }
+  ]
+}

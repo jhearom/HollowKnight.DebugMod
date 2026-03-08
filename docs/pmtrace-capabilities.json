@@ -1,177 +1,252 @@
 {
-  "artifact_version": "1.0.0",
+  "artifact_version": "2.0.0",
   "feature": "DebugMod PlayMaker Runtime Trace (PM Trace)",
+  "schema_version": 2,
   "default_patch_scope": "1.5.78.11833",
+  "secondary_patch_scope": "1.5.12459 (best effort)",
   "runtime_target": "Windows 11",
   "development_environment": "Ubuntu 24.04",
+  "defaults": {
+    "enabled_at_launch": false,
+    "enabled_after_reload": false,
+    "max_rows": 50000,
+    "active_profile": "default_fsm"
+  },
   "config": {
     "primary_path": "%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.json",
     "windows_template_path": "%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.template.windows.json",
     "schema_path": "docs/pmtrace-config.schema.json",
-    "defaults": {
-      "enabled": false,
-      "maxRows": 50000,
-      "filters": {
-        "sceneAllowlist": [],
-        "gameObjectFilter": {
-          "mode": "off",
-          "value": "",
-          "ignoreCase": true
-        },
-        "fsmFilter": {
-          "mode": "off",
-          "value": "",
-          "ignoreCase": true
-        },
-        "eventFilter": {
-          "mode": "off",
-          "value": "",
-          "ignoreCase": true
-        }
-      },
-      "snapshots": {
-        "includeHeroSnapshot": true,
-        "includeFsmVars": true,
-        "fsmBoolAllowlist": [],
-        "fsmIntAllowlist": [],
-        "fsmFloatAllowlist": []
-      },
-      "output": {
-        "outputDirOverride": "",
-        "filePrefix": "pmtrace"
-      }
-    },
-    "runtime_enabled_policy": {
-      "launch_state": "forced_disabled",
-      "reload_state": "forced_disabled",
-      "persistence": "enable/disable UI actions do not persist enabled state across launches",
-      "compatibility_note": "config.enabled is retained for compatibility but normalized to false at runtime load."
-    }
-  },
-  "capture": {
-    "hooks": [
-      {
-        "hook": "HutongGames.PlayMaker.Fsm.DoTransition",
-        "event_behavior": "captures transition event name when available"
-      },
-      {
-        "hook": "HutongGames.PlayMaker.Fsm.SetState",
-        "event_behavior": "captures direct state set when not nested under DoTransition",
-        "event_name": "__direct_set_state__"
-      }
+    "top_level_keys": [
+      "schemaVersion",
+      "maxRows",
+      "activeProfile",
+      "profiles",
+      "output",
+      "commandScript"
     ],
-    "event_name_fallback": "__unknown_event__",
-    "record_condition": "trace enabled and all active filters pass",
-    "filters": {
-      "all_must_match": true,
-      "sceneAllowlist": {
-        "match": "exact string",
-        "empty_behavior": "no scene filtering"
-      },
-      "pattern_filters": {
-        "targets": [
-          "gameObjectFilter",
-          "fsmFilter",
-          "eventFilter"
-        ],
-        "supported_modes": [
-          "off",
-          "exact",
-          "contains",
-          "regex"
-        ],
-        "ignore_case_supported": true,
-        "invalid_regex_behavior": "filter is disabled and warning is logged"
-      }
+    "command_script": {
+      "path": "%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_commands.txt",
+      "auto_run_key": "commandScript.autoRunOnReload"
     },
-    "buffering": {
-      "mode": "in-memory row buffer",
-      "max_rows_key": "maxRows",
-      "max_rows_behavior": "when full, new matching rows are dropped",
-      "dropped_counter": "dropped_rows",
-      "clear_buffer_resets_dropped_counter": true
-    },
-    "timestamps": {
-      "frame_count": "Unity Time.frameCount",
-      "fixed_frame_count": "proxy from fixedTime / fixedDeltaTime",
-      "fixed_frame_source": "proxy_fixedTime_over_fixedDeltaTime",
-      "time": "Unity Time.time",
-      "fixed_time": "Unity Time.fixedTime",
-      "t_ft": "time - fixed_time",
-      "unscaled_time": "Unity Time.unscaledTime"
-    },
-    "optional_snapshots": {
-      "hero_snapshot": {
-        "config_key": "snapshots.includeHeroSnapshot",
-        "fields": [
-          "hero_state",
-          "hero_flags.controlReqlinquished",
-          "hero_flags.transition_state",
-          "hero_flags.cstate_transitioning",
-          "hero_flags.cstate_willHardLand",
-          "hero_flags.cstate_dead"
+    "built_in_profiles": [
+      {
+        "name": "default_fsm",
+        "enabled_probes": [
+          "fsm_transition"
         ]
       },
-      "fsm_variable_snapshot": {
-        "config_key": "snapshots.includeFsmVars",
-        "allowlists": {
-          "bools": "snapshots.fsmBoolAllowlist",
-          "ints": "snapshots.fsmIntAllowlist",
-          "floats": "snapshots.fsmFloatAllowlist"
-        },
-        "behavior": "only allowlisted variables present on FSM are emitted"
+      {
+        "name": "combat_minimal",
+        "enabled_probes": [
+          "fsm_transition",
+          "damage_pipeline"
+        ]
+      },
+      {
+        "name": "shriek_hitgate",
+        "enabled_probes": [
+          "fsm_transition",
+          "damage_pipeline",
+          "collider_contact",
+          "field_watch"
+        ]
       }
+    ]
+  },
+  "probes": [
+    {
+      "name": "fsm_transition",
+      "hooks": [
+        "HutongGames.PlayMaker.Fsm.DoTransition",
+        "HutongGames.PlayMaker.Fsm.SetState"
+      ],
+      "event_examples": [
+        "__unknown_event__",
+        "__direct_set_state__"
+      ],
+      "payload": {
+        "optional": [
+          "hero_state",
+          "hero_flags",
+          "fsm_vars"
+        ]
+      }
+    },
+    {
+      "name": "damage_pipeline",
+      "hooks": [
+        "HealthManager.Hit",
+        "HealthManager.TakeDamage",
+        "HealthManager.Invincible",
+        "HealthManager.NonFatalHit",
+        "HealthManager.IsBlockingByDirection",
+        "HealthManager.CheckInvincible",
+        "LimitSendEvents.Add",
+        "LimitSendEvents.OnEnable"
+      ],
+      "event_examples": [
+        "hit_attempt",
+        "hit_result",
+        "take_damage_entry",
+        "take_damage_exit",
+        "invincible_entry",
+        "invincible_exit",
+        "non_fatal_hit",
+        "gate_block_check",
+        "check_invincible",
+        "limit_send_add",
+        "limit_send_reset"
+      ]
+    },
+    {
+      "name": "collider_contact",
+      "hooks": [
+        "PlayMakerUnity2DProxy.OnTriggerEnter2D",
+        "PlayMakerUnity2DProxy.OnTriggerStay2D",
+        "PlayMakerUnity2DProxy.OnTriggerExit2D",
+        "PlayMakerUnity2DProxy.OnCollisionEnter2D",
+        "PlayMakerUnity2DProxy.OnCollisionStay2D",
+        "PlayMakerUnity2DProxy.OnCollisionExit2D"
+      ],
+      "event_examples": [
+        "trigger_enter",
+        "trigger_stay",
+        "trigger_exit",
+        "collision_enter",
+        "collision_stay",
+        "collision_exit"
+      ]
+    },
+    {
+      "name": "component_toggle",
+      "mode": "bounded cadence sampling",
+      "event_examples": [
+        "component_enabled",
+        "component_disabled"
+      ],
+      "notes": [
+        "No generic MMHOOK surface exists for UnityEngine.Behaviour.enabled in this runtime.",
+        "Sampling is explicit/opt-in via profile componentToggle settings."
+      ]
+    },
+    {
+      "name": "field_watch",
+      "mode": "event-driven snapshots + optional bounded cadence",
+      "watch_keys": [
+        "fieldWatches[].typeName",
+        "fieldWatches[].fieldName"
+      ],
+      "event_triggers": [
+        "HealthManager.* hooks",
+        "LimitSendEvents.* hooks",
+        "optional cadence tick"
+      ]
     }
+  ],
+  "global_filters": [
+    "sceneAllowlist",
+    "gameObjectFilter",
+    "fsmFilter",
+    "eventFilter",
+    "probeFilter",
+    "componentTypeFilter"
+  ],
+  "record_envelope": {
+    "required_fields": [
+      "session_id",
+      "sequence_id",
+      "event_type",
+      "scene_name",
+      "frame_count",
+      "fixed_frame_count",
+      "time",
+      "fixed_time",
+      "t_ft",
+      "delta_time",
+      "fixed_delta_time",
+      "unscaled_time",
+      "realtime_since_startup"
+    ],
+    "optional_identity_fields": [
+      "source_object",
+      "source_fsm",
+      "source_instance_id",
+      "target_object",
+      "target_instance_id",
+      "event_name",
+      "from_state",
+      "to_state",
+      "component_type"
+    ],
+    "payload_field": "payload (probe-specific)"
   },
   "output": {
     "default_directory": "%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace",
     "directory_override_key": "output.outputDirOverride",
     "file_prefix_key": "output.filePrefix",
-    "trace_file_format": "JSONL",
     "trace_file_pattern": "<filePrefix>_<yyyyMMdd_HHmmss_fff UTC>_<sessionId8>.jsonl",
     "status_file_pattern": "pmtrace_status_<yyyyMMdd_HHmmss_fff UTC>_<sessionId8>.json",
     "flush_triggers": [
-      "manual: Flush Trace",
-      "auto: Disable Trace (if unflushed rows exist)",
-      "auto: application quit hook (if unflushed rows exist)"
+      "manual flush",
+      "auto flush on disable when unflushed rows exist",
+      "auto flush on application quit when unflushed rows exist"
     ],
-    "auto_flush_dedup": "no auto flush write when no new rows since last successful flush"
+    "drop_behavior": "When maxRows is reached, additional matching rows are dropped and counted."
   },
-  "ui_controls": [
-    "Enable Trace / Disable Trace (single visible toggle based on state)",
-    "Clear Buffer",
-    "Flush Trace",
-    "Reload Config",
-    "Show Status",
-    "Dump Status"
-  ],
-  "status_outputs": {
-    "show_status_lines": [
-      "enabled / buffered row count / dropped row count",
-      "config path",
-      "resolved output directory",
-      "active filters summary"
+  "runtime_controls": {
+    "menu": [
+      "Enable/Disable Trace",
+      "List Profiles",
+      "Next Profile",
+      "Run Script",
+      "Clear Buffer",
+      "Flush Trace",
+      "Reload Config",
+      "Show Status",
+      "Dump Status"
     ],
-    "dump_status_json_fields": [
-      "session_id",
-      "utc_timestamp",
-      "enabled",
-      "buffered_rows",
-      "dropped_rows",
-      "config_path",
-      "output_dir",
-      "filters.scene_allowlist",
-      "filters.game_object_filter",
-      "filters.fsm_filter",
-      "filters.event_filter"
-    ]
+    "command_surface": {
+      "interop_method": "DebugExport.ExecutePmTraceCommand(string commandLine)",
+      "help_method": "DebugExport.GetPmTraceCommandHelp()",
+      "supported_commands": [
+        "pmtrace help",
+        "pmtrace enable",
+        "pmtrace disable",
+        "pmtrace clear",
+        "pmtrace flush",
+        "pmtrace reload",
+        "pmtrace status",
+        "pmtrace dump_status",
+        "pmtrace profiles list",
+        "pmtrace profile activate <name>"
+      ],
+      "response_format": {
+        "type": "json-string",
+        "fields": [
+          "ok",
+          "code",
+          "message",
+          "data (optional)"
+        ]
+      }
+    },
+    "script_runner": {
+      "entrypoint": "PlayMakerTraceManager.RunCommandScript()",
+      "format": "one PM Trace command per line; blank lines and # comments allowed",
+      "safety_constraints": [
+        "fixed script path inside DebugModData (no path override)",
+        "no shell or process execution",
+        "64 KiB max file size",
+        "128 max executable commands per run",
+        "512 max command-line length",
+        "forbidden token rejection (;, &&, ||, |, `, $() )",
+        "fail-closed on first invalid command/result"
+      ]
+    }
   },
   "schemas": {
     "config_schema": "docs/pmtrace-config.schema.json",
-    "record_schema": "docs/pmtrace-record.schema.json"
-  },
-  "record_notes": [
-    "See docs/pmtrace-record.schema.json for full row contract.",
-    "All rows include session_id to correlate files and runs."
-  ]
+    "record_schema": "docs/pmtrace-record.schema.json",
+    "command_contract": "docs/pmtrace-command-contract.json"
+  }
 }

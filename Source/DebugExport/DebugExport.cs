@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DebugMod.PlayMakerTrace;
 using MonoMod.ModInterop;
 
 namespace DebugMod
@@ -47,5 +48,11 @@ namespace DebugMod
         
         public static void RemoveFromOnRemoveAllCharm(Action onRemoveCharms)
             => BindableFunctions.OnRemoveAllCharms -= onRemoveCharms;
+
+        public static string ExecutePmTraceCommand(string commandLine)
+            => PlayMakerTraceCommandDispatcher.Execute(commandLine);
+
+        public static string GetPmTraceCommandHelp()
+            => PlayMakerTraceCommandDispatcher.Help();
     }
 }

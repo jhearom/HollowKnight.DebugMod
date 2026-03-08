@@ -3,28 +3,19 @@ using Newtonsoft.Json;
 
 namespace DebugMod.PlayMakerTrace
 {
-    internal sealed class PlayMakerTraceRecord
+    internal sealed class PlayMakerTraceEventRecord
     {
         [JsonProperty("session_id")]
         public string SessionId { get; set; } = "";
 
+        [JsonProperty("sequence_id")]
+        public long SequenceId { get; set; }
+
+        [JsonProperty("event_type")]
+        public string EventType { get; set; } = "";
+
         [JsonProperty("scene_name")]
         public string SceneName { get; set; } = "";
-
-        [JsonProperty("game_object")]
-        public string GameObject { get; set; } = "";
-
-        [JsonProperty("fsm_name")]
-        public string FsmName { get; set; } = "";
-
-        [JsonProperty("from_state")]
-        public string FromState { get; set; } = "";
-
-        [JsonProperty("to_state")]
-        public string ToState { get; set; } = "";
-
-        [JsonProperty("event_name")]
-        public string EventName { get; set; } = "";
 
         [JsonProperty("frame_count")]
         public int FrameCount { get; set; }
@@ -41,12 +32,67 @@ namespace DebugMod.PlayMakerTrace
         [JsonProperty("t_ft")]
         public float TimeMinusFixedTime { get; set; }
 
+        [JsonProperty("delta_time")]
+        public float DeltaTime { get; set; }
+
+        [JsonProperty("fixed_delta_time")]
+        public float FixedDeltaTime { get; set; }
+
         [JsonProperty("unscaled_time")]
         public float UnscaledTime { get; set; }
 
-        [JsonProperty("fixed_frame_source")]
-        public string FixedFrameSource { get; set; } = "proxy_fixedTime_over_fixedDeltaTime";
+        [JsonProperty("realtime_since_startup")]
+        public float RealtimeSinceStartup { get; set; }
 
+        [JsonProperty("source_object", NullValueHandling = NullValueHandling.Ignore)]
+        public string? SourceObject { get; set; }
+
+        [JsonProperty("source_fsm", NullValueHandling = NullValueHandling.Ignore)]
+        public string? SourceFsm { get; set; }
+
+        [JsonProperty("source_instance_id", NullValueHandling = NullValueHandling.Ignore)]
+        public int? SourceInstanceId { get; set; }
+
+        [JsonProperty("target_object", NullValueHandling = NullValueHandling.Ignore)]
+        public string? TargetObject { get; set; }
+
+        [JsonProperty("target_instance_id", NullValueHandling = NullValueHandling.Ignore)]
+        public int? TargetInstanceId { get; set; }
+
+        [JsonProperty("event_name", NullValueHandling = NullValueHandling.Ignore)]
+        public string? EventName { get; set; }
+
+        [JsonProperty("from_state", NullValueHandling = NullValueHandling.Ignore)]
+        public string? FromState { get; set; }
+
+        [JsonProperty("to_state", NullValueHandling = NullValueHandling.Ignore)]
+        public string? ToState { get; set; }
+
+        [JsonProperty("component_type", NullValueHandling = NullValueHandling.Ignore)]
+        public string? ComponentType { get; set; }
+
+        [JsonProperty("payload", NullValueHandling = NullValueHandling.Ignore)]
+        public object? Payload { get; set; }
+    }
+
+    internal sealed class PlayMakerTraceEventRequest
+    {
+        public string ProbeType { get; set; } = "";
+        public string SceneName { get; set; } = "";
+        public string? SourceObject { get; set; }
+        public string? SourceFsm { get; set; }
+        public int? SourceInstanceId { get; set; }
+        public string? TargetObject { get; set; }
+        public int? TargetInstanceId { get; set; }
+        public string? EventName { get; set; }
+        public string? FromState { get; set; }
+        public string? ToState { get; set; }
+        public string? ComponentType { get; set; }
+        public object? Payload { get; set; }
+    }
+
+    internal sealed class PlayMakerTraceFsmPayload
+    {
         [JsonProperty("hero_state", NullValueHandling = NullValueHandling.Ignore)]
         public string? HeroState { get; set; }
 

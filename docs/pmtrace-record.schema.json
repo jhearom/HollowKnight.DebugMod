@@ -1,56 +1,48 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://jhearom.github.io/HollowKnight.DebugMod/docs/pmtrace-record.schema.json",
-  "title": "DebugMod PM Trace Record",
-  "description": "Schema for each JSON object row in PM trace JSONL output files.",
+  "title": "DebugMod PM Trace Record v2",
+  "description": "Schema for each JSON object row in PM Trace JSONL output.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "session_id",
+    "sequence_id",
+    "event_type",
     "scene_name",
-    "game_object",
-    "fsm_name",
-    "from_state",
-    "to_state",
-    "event_name",
     "frame_count",
     "fixed_frame_count",
     "time",
     "fixed_time",
     "t_ft",
+    "delta_time",
+    "fixed_delta_time",
     "unscaled_time",
-    "fixed_frame_source"
+    "realtime_since_startup"
   ],
   "properties": {
     "session_id": {
       "type": "string",
-      "description": "Session identifier for this mod run."
+      "description": "Session identifier for PM Trace runtime instance."
+    },
+    "sequence_id": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonic per-session row sequence number."
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Probe name (e.g., fsm_transition, damage_pipeline)."
     },
     "scene_name": {
       "type": "string"
-    },
-    "game_object": {
-      "type": "string"
-    },
-    "fsm_name": {
-      "type": "string"
-    },
-    "from_state": {
-      "type": "string"
-    },
-    "to_state": {
-      "type": "string"
-    },
-    "event_name": {
-      "type": "string",
-      "description": "Transition trigger event, '__direct_set_state__', or '__unknown_event__'."
     },
     "frame_count": {
       "type": "integer"
     },
     "fixed_frame_count": {
       "type": "integer",
-      "description": "Proxy counter derived from fixedTime / fixedDeltaTime."
+      "description": "Proxy from fixedTime / fixedDeltaTime."
     },
     "time": {
       "type": "number"
@@ -62,67 +54,70 @@
       "type": "number",
       "description": "time - fixed_time"
     },
+    "delta_time": {
+      "type": "number"
+    },
+    "fixed_delta_time": {
+      "type": "number"
+    },
     "unscaled_time": {
       "type": "number"
     },
-    "fixed_frame_source": {
-      "type": "string",
-      "const": "proxy_fixedTime_over_fixedDeltaTime"
+    "realtime_since_startup": {
+      "type": "number"
     },
-    "hero_state": {
+    "source_object": {
       "type": "string"
     },
-    "hero_flags": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "controlReqlinquished",
-        "transition_state",
-        "cstate_transitioning",
-        "cstate_willHardLand",
-        "cstate_dead"
-      ],
-      "properties": {
-        "controlReqlinquished": {
-          "type": "boolean"
+    "source_fsm": {
+      "type": "string"
+    },
+    "source_instance_id": {
+      "type": "integer"
+    },
+    "target_object": {
+      "type": "string"
+    },
+    "target_instance_id": {
+      "type": "integer"
+    },
+    "event_name": {
+      "type": "string"
+    },
+    "from_state": {
+      "type": "string"
+    },
+    "to_state": {
+      "type": "string"
+    },
+    "component_type": {
+      "type": "string"
+    },
+    "payload": {
+      "description": "Probe-specific payload object; shape depends on event_type/event_name.",
+      "oneOf": [
+        {
+          "type": "object"
         },
-        "transition_state": {
+        {
+          "type": "array"
+        },
+        {
           "type": "string"
         },
-        "cstate_transitioning": {
+        {
+          "type": "number"
+        },
+        {
+          "type": "integer"
+        },
+        {
           "type": "boolean"
         },
-        "cstate_willHardLand": {
-          "type": "boolean"
-        },
-        "cstate_dead": {
-          "type": "boolean"
+        {
+          "type": "null"
         }
-      }
-    },
-    "fsm_vars": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "bools": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "boolean"
-          }
-        },
-        "ints": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "integer"
-          }
-        },
-        "floats": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "number"
-          }
-        }
-      }
+      ]
     }
   }
 }

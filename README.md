@@ -28,10 +28,9 @@
 * Disable the lighting around the player
 * Disable the vignette drawn around the player
 * Change the time scale of the game
-----------------------------------------------------------------------------------------
                          PLAYMAKER RUNTIME TRACE (PM TRACE)
 ----------------------------------------------------------------------------------------
-DebugMod includes an opt-in PlayMaker transition tracer for runtime analysis.
+DebugMod includes an opt-in, profile-based multi-probe PM Trace runtime for analysis.
 
 Default behavior:
 * OFF by default
@@ -40,6 +39,9 @@ Default behavior:
 
 Runtime controls (F1 Top Menu -> `PM Trace`):
 * Enable/Disable Trace (single toggle button based on current state)
+* List Profiles
+* Next Profile
+* Run Script
 * Clear Buffer
 * Flush Trace
 * Reload Config
@@ -50,23 +52,56 @@ Config file:
 * `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.json`
 * If missing, it is created automatically with defaults.
 * Edit filters/output in this file, then use `Reload Config` in-game.
+* Optional script-runner flag:
+  * `commandScript.autoRunOnReload` (default `false`)
 * A starter template is also generated at:
   `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_config.template.windows.json`
 * Machine-readable contract artifacts for tooling/analysis:
   * `docs/pmtrace-capabilities.json`
   * `docs/pmtrace-config.schema.json`
   * `docs/pmtrace-record.schema.json`
+  * `docs/pmtrace-command-contract.json`
   * `docs/pmtrace-analysis-prompt-template.md`
 
 Default output:
 * `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace\\pmtrace_<timestamp>_<session>.jsonl`
 
+Command script file (manual-first execution path):
+* `%APPDATA%\\..\\LocalLow\\Team Cherry\\Hollow Knight\\DebugModData\\pmtrace_commands.txt`
+* Execute via PM Trace menu button: `Run Script`
+* Optional auto-run on `Reload Config` when `commandScript.autoRunOnReload=true`
+* Script format:
+  * one PM Trace command per line
+  * blank lines and `#` comments allowed
+  * command examples:
+    * `pmtrace profile activate shriek_hitgate`
+    * `pmtrace clear`
+    * `pmtrace enable`
+    * `pmtrace disable`
+    * `pmtrace flush`
+
+Automation command surface:
+* `DebugExport.ExecutePmTraceCommand(string commandLine)`
+* `DebugExport.GetPmTraceCommandHelp()`
+* Supported commands:
+  * `pmtrace help`
+  * `pmtrace enable|disable|clear|flush|reload|status|dump_status`
+  * `pmtrace profiles list`
+  * `pmtrace profile activate <name>`
+* Command responses are JSON payloads (`ok`, `code`, `message`, optional `data`) for parse-friendly automation.
+
 Notes:
-* JSONL rows include transition timing/state fields plus optional hero/FSM snapshots (allowlist-based).
+* JSONL rows use a normalized event envelope (`event_type`, timing/session fields, source/target identity, optional payload).
+* PM Trace built-in profiles: `default_fsm`, `combat_minimal`, `shriek_hitgate`.
 * `fixed_frame_count` is a sampled proxy based on `fixedTime / fixedDeltaTime`.
 * `Dump Status` writes a small JSON status snapshot into the PM trace output directory.
 * PM Trace now auto-flushes buffered rows when trace is disabled and on application quit (if new rows were captured since the last flush).
-* `enabled` in `pmtrace_config.json` is retained for compatibility, but launch/reload policy forces PM Trace runtime state to disabled.
+* Script runner safety constraints:
+  * fixed file path inside `DebugModData` only,
+  * strict command allowlist parser reuse (no shell/process execution),
+  * command/file size limits,
+  * command chaining token rejection (`;`, `&&`, `||`, `|`, etc.),
+  * fail-closed on first invalid line.
 ----------------------------------------------------------------------------------------
                              INSTALLATION (STEAM, WINDOWS)
 ----------------------------------------------------------------------------------------

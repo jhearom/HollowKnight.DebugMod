@@ -1,37 +1,48 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://jhearom.github.io/HollowKnight.DebugMod/docs/pmtrace-config.schema.json",
-  "title": "DebugMod PM Trace Config",
-  "description": "Schema for DebugMod PlayMaker runtime trace configuration file (pmtrace_config.json).",
+  "title": "DebugMod PM Trace Config v2",
+  "description": "Schema for DebugMod PM Trace profile-based configuration (pmtrace_config.json).",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "enabled",
+    "schemaVersion",
     "maxRows",
-    "filters",
-    "snapshots",
-    "output"
+    "activeProfile",
+    "profiles",
+    "output",
+    "commandScript"
   ],
   "properties": {
-    "enabled": {
-      "type": "boolean",
-      "default": false,
-      "description": "Compatibility field. PM Trace runtime startup/reload policy forces disabled state; enable/disable is controlled in-session via UI."
+    "schemaVersion": {
+      "type": "integer",
+      "const": 2,
+      "description": "PM Trace config schema version."
     },
     "maxRows": {
       "type": "integer",
       "minimum": 1,
       "default": 50000,
-      "description": "Maximum buffered rows retained before new matching rows are dropped."
+      "description": "Global in-memory row budget before additional rows are dropped."
     },
-    "filters": {
-      "$ref": "#/$defs/filters"
+    "activeProfile": {
+      "type": "string",
+      "default": "default_fsm",
+      "description": "Profile name used when PM Trace initializes/reloads."
     },
-    "snapshots": {
-      "$ref": "#/$defs/snapshots"
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/profile"
+      },
+      "description": "Profile map keyed by profile name."
     },
     "output": {
       "$ref": "#/$defs/output"
+    },
+    "commandScript": {
+      "$ref": "#/$defs/commandScript"
     }
   },
   "$defs": {
@@ -52,18 +63,15 @@
             "contains",
             "regex"
           ],
-          "default": "off",
-          "description": "Filter mode. Invalid/unknown values are treated as off by implementation."
+          "default": "off"
         },
         "value": {
           "type": "string",
-          "default": "",
-          "description": "Match value for exact/contains/regex modes."
+          "default": ""
         },
         "ignoreCase": {
           "type": "boolean",
-          "default": true,
-          "description": "Case-insensitive matching toggle for exact/contains/regex."
+          "default": true
         }
       }
     },
@@ -74,7 +82,9 @@
         "sceneAllowlist",
         "gameObjectFilter",
         "fsmFilter",
-        "eventFilter"
+        "eventFilter",
+        "probeFilter",
+        "componentTypeFilter"
       ],
       "properties": {
         "sceneAllowlist": {
@@ -82,8 +92,7 @@
           "items": {
             "type": "string"
           },
-          "default": [],
-          "description": "Exact scene-name allowlist; empty array disables scene filtering."
+          "default": []
         },
         "gameObjectFilter": {
           "$ref": "#/$defs/patternFilter"
@@ -93,10 +102,16 @@
         },
         "eventFilter": {
           "$ref": "#/$defs/patternFilter"
+        },
+        "probeFilter": {
+          "$ref": "#/$defs/patternFilter"
+        },
+        "componentTypeFilter": {
+          "$ref": "#/$defs/patternFilter"
         }
       }
     },
-    "snapshots": {
+    "fsmTransition": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -109,37 +124,244 @@
       "properties": {
         "includeHeroSnapshot": {
           "type": "boolean",
-          "default": true,
-          "description": "Include hero_state and hero_flags fields when available."
+          "default": true
         },
         "includeFsmVars": {
           "type": "boolean",
-          "default": true,
-          "description": "Include allowlisted FSM variable snapshot fields when available."
+          "default": true
         },
         "fsmBoolAllowlist": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "default": [],
-          "description": "FSM bool variable names to capture."
+          "default": []
         },
         "fsmIntAllowlist": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "default": [],
-          "description": "FSM int variable names to capture."
+          "default": []
         },
         "fsmFloatAllowlist": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "default": [],
-          "description": "FSM float variable names to capture."
+          "default": []
+        }
+      }
+    },
+    "damagePipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "includeHitAttempt",
+        "includeGateChecks",
+        "includeTakeDamage",
+        "includeInvincible",
+        "includeNonFatalHit",
+        "includeLimitSendEvents"
+      ],
+      "properties": {
+        "includeHitAttempt": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeGateChecks": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeTakeDamage": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeInvincible": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeNonFatalHit": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeLimitSendEvents": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "colliderContact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "includeTriggerEnter",
+        "includeTriggerStay",
+        "includeTriggerExit",
+        "includeCollisionEvents",
+        "sourceObjectFilter",
+        "targetObjectFilter"
+      ],
+      "properties": {
+        "includeTriggerEnter": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeTriggerStay": {
+          "type": "boolean",
+          "default": false
+        },
+        "includeTriggerExit": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeCollisionEvents": {
+          "type": "boolean",
+          "default": false
+        },
+        "sourceObjectFilter": {
+          "$ref": "#/$defs/patternFilter"
+        },
+        "targetObjectFilter": {
+          "$ref": "#/$defs/patternFilter"
+        }
+      }
+    },
+    "componentToggle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "componentTypeAllowlist",
+        "pollIntervalSeconds",
+        "maxComponentsPerSample",
+        "includeInactiveGameObjects"
+      ],
+      "properties": {
+        "componentTypeAllowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "pollIntervalSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0.25
+        },
+        "maxComponentsPerSample": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 256
+        },
+        "includeInactiveGameObjects": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "fieldWatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "typeName",
+        "fieldName"
+      ],
+      "properties": {
+        "typeName": {
+          "type": "string"
+        },
+        "fieldName": {
+          "type": "string"
+        }
+      }
+    },
+    "fieldWatchProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "emitOnDamageEvents",
+        "emitOnLimitSendEvents",
+        "cadenceSeconds",
+        "maxObjectsPerSample",
+        "serializeCollectionsAsCount",
+        "maxCollectionPreviewItems"
+      ],
+      "properties": {
+        "emitOnDamageEvents": {
+          "type": "boolean",
+          "default": true
+        },
+        "emitOnLimitSendEvents": {
+          "type": "boolean",
+          "default": true
+        },
+        "cadenceSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        },
+        "maxObjectsPerSample": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 32
+        },
+        "serializeCollectionsAsCount": {
+          "type": "boolean",
+          "default": true
+        },
+        "maxCollectionPreviewItems": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabledProbes",
+        "filters",
+        "fsmTransition",
+        "damagePipeline",
+        "colliderContact",
+        "componentToggle",
+        "fieldWatches",
+        "fieldWatchProbe"
+      ],
+      "properties": {
+        "enabledProbes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "filters": {
+          "$ref": "#/$defs/filters"
+        },
+        "fsmTransition": {
+          "$ref": "#/$defs/fsmTransition"
+        },
+        "damagePipeline": {
+          "$ref": "#/$defs/damagePipeline"
+        },
+        "colliderContact": {
+          "$ref": "#/$defs/colliderContact"
+        },
+        "componentToggle": {
+          "$ref": "#/$defs/componentToggle"
+        },
+        "fieldWatches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/fieldWatch"
+          },
+          "default": []
+        },
+        "fieldWatchProbe": {
+          "$ref": "#/$defs/fieldWatchProbe"
         }
       }
     },
@@ -153,55 +375,120 @@
       "properties": {
         "outputDirOverride": {
           "type": "string",
-          "default": "",
-          "description": "Optional absolute/relative directory path override for output files. Empty uses default DebugModData\\pmtrace."
+          "default": ""
         },
         "filePrefix": {
           "type": "string",
-          "default": "pmtrace",
-          "description": "Prefix used when naming JSONL trace files."
+          "default": "pmtrace"
+        }
+      }
+    },
+    "commandScript": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "autoRunOnReload"
+      ],
+      "properties": {
+        "autoRunOnReload": {
+          "type": "boolean",
+          "default": false
         }
       }
     }
   },
   "examples": [
     {
-      "enabled": false,
+      "schemaVersion": 2,
       "maxRows": 50000,
-      "filters": {
-        "sceneAllowlist": [
-          "level250"
-        ],
-        "gameObjectFilter": {
-          "mode": "contains",
-          "value": "Zombie Miner 1 (3)",
-          "ignoreCase": true
-        },
-        "fsmFilter": {
-          "mode": "off",
-          "value": "",
-          "ignoreCase": true
-        },
-        "eventFilter": {
-          "mode": "off",
-          "value": "",
-          "ignoreCase": true
+      "activeProfile": "default_fsm",
+      "profiles": {
+        "default_fsm": {
+          "enabledProbes": [
+            "fsm_transition"
+          ],
+          "filters": {
+            "sceneAllowlist": [],
+            "gameObjectFilter": {
+              "mode": "off",
+              "value": "",
+              "ignoreCase": true
+            },
+            "fsmFilter": {
+              "mode": "off",
+              "value": "",
+              "ignoreCase": true
+            },
+            "eventFilter": {
+              "mode": "off",
+              "value": "",
+              "ignoreCase": true
+            },
+            "probeFilter": {
+              "mode": "off",
+              "value": "",
+              "ignoreCase": true
+            },
+            "componentTypeFilter": {
+              "mode": "off",
+              "value": "",
+              "ignoreCase": true
+            }
+          },
+          "fsmTransition": {
+            "includeHeroSnapshot": true,
+            "includeFsmVars": true,
+            "fsmBoolAllowlist": [],
+            "fsmIntAllowlist": [],
+            "fsmFloatAllowlist": []
+          },
+          "damagePipeline": {
+            "includeHitAttempt": true,
+            "includeGateChecks": true,
+            "includeTakeDamage": true,
+            "includeInvincible": true,
+            "includeNonFatalHit": true,
+            "includeLimitSendEvents": true
+          },
+          "colliderContact": {
+            "includeTriggerEnter": true,
+            "includeTriggerStay": false,
+            "includeTriggerExit": true,
+            "includeCollisionEvents": false,
+            "sourceObjectFilter": {
+              "mode": "off",
+              "value": "",
+              "ignoreCase": true
+            },
+            "targetObjectFilter": {
+              "mode": "off",
+              "value": "",
+              "ignoreCase": true
+            }
+          },
+          "componentToggle": {
+            "componentTypeAllowlist": [],
+            "pollIntervalSeconds": 0.25,
+            "maxComponentsPerSample": 256,
+            "includeInactiveGameObjects": true
+          },
+          "fieldWatches": [],
+          "fieldWatchProbe": {
+            "emitOnDamageEvents": true,
+            "emitOnLimitSendEvents": true,
+            "cadenceSeconds": 0,
+            "maxObjectsPerSample": 32,
+            "serializeCollectionsAsCount": true,
+            "maxCollectionPreviewItems": 5
+          }
         }
-      },
-      "snapshots": {
-        "includeHeroSnapshot": true,
-        "includeFsmVars": true,
-        "fsmBoolAllowlist": [
-          "Activated",
-          "In Position",
-          "Hero In Range"
-        ],
-        "fsmIntAllowlist": [],
-        "fsmFloatAllowlist": []
       },
       "output": {
         "outputDirOverride": "",
         "filePrefix": "pmtrace"
+      },
+      "commandScript": {
+        "autoRunOnReload": false
       }
     }
   ]
