@@ -1,13 +1,13 @@
 # This is a basic workflow to help you get started with Actions
 
-name: v1.5
+name: v1.5.78
 
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ master ]
+    branches: [ 1.5.78 ]
   pull_request:
-    branches: [ master ]
+    branches: [ 1.5.78 ]
   workflow_dispatch:
     inputs:
       should_release:
