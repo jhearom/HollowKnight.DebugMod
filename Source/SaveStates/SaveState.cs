@@ -229,6 +229,7 @@ namespace DebugMod
             //var used to prevent saves/loads, double save/loads softlock in menderbug, double load, black screen, etc
             loadingSavestate = true;
             bool stateondeath = DebugMod.stateOnDeath;
+            bool permadeathModeChanged = PlayerData.instance.permadeathMode != data.savedPd?.permadeathMode;
             DebugMod.stateOnDeath = false;
 
             //prevents silly things from happening
@@ -417,7 +418,7 @@ namespace DebugMod
 
             TimeSpan loadingStateTime = loadingStateTimer.Elapsed;
 
-            HUDFixes();
+            HUDFixes(permadeathModeChanged);
             
             if (isPanthState) yield return PanthSaveState.SetupPanthTransition();
 
@@ -469,11 +470,19 @@ namespace DebugMod
         }
 
         //Moving all HUD related code to here for clarity
-        private void HUDFixes()
+        private void HUDFixes(bool forceHudRebuild = false)
         {
             GameObject? hudCanvas = GameCameras.instance?.hudCanvas?.gameObject;
             if (hudCanvas != null)
             {
+                // A savestate can flip between normal and Steel Soul mode, which changes the
+                // HUD presentation. Force a canvas rebuild for that mode switch before running
+                // the rest of the existing HUD repair logic.
+                if (forceHudRebuild && hudCanvas.activeSelf)
+                {
+                    hudCanvas.SetActive(false);
+                }
+
                 hudCanvas.SetActive(true);
 
                 // THK final-blow can leave HUD Canvas::Slide Out latched "Out".
