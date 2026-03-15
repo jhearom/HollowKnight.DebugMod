@@ -239,7 +239,7 @@ namespace DebugMod
             loadingStateTimer.Start();
 
             //setup panth stuff since it wants to be loaded one room ahead of time
-            if (PanthSaveState.panthSequences.Contains(data.roomSpecificOptions) && (data.saveScene != "GG_Atrium") &&  (data.saveScene != "GG_Atrium_Roof"))
+            if (PanthSaveState.IsPantheonSequence(data.roomSpecificOptions) && (data.saveScene != "GG_Atrium") &&  (data.saveScene != "GG_Atrium_Roof"))
             {
                 PanthSaveState.LoadPanthScene(data.roomSpecificOptions, data.specialIndex);
             }
