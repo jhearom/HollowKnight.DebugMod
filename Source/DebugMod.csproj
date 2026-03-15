@@ -13,6 +13,7 @@
     <NoWarn>CS1591</NoWarn>
 	<Nullable>enable</Nullable>
     <ModdingApiFolder Condition="'$(ModdingApiFolder)' == ''">$(HollowKnightFolder)</ModdingApiFolder>
+    <BuildUtc>$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))</BuildUtc>
   </PropertyGroup>
 
 	<!-- Create a LocalBuildProperties.props file which defines HollowKnightFolder (references dir) 
@@ -25,6 +26,12 @@
  </ItemGroup>
  <ItemGroup>
      <EmbeddedResource Include="Images\**\*.png" />
+ </ItemGroup>
+ <ItemGroup>
+     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+         <_Parameter1>BuildUtc</_Parameter1>
+         <_Parameter2>$(BuildUtc)</_Parameter2>
+     </AssemblyAttribute>
  </ItemGroup>
 
  <!-- Same References -->

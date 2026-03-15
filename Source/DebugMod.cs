@@ -24,6 +24,8 @@ namespace DebugMod
 {
     public class DebugMod : Mod, IGlobalSettings<GlobalSettings>, ILocalSettings<SaveSettings>, ICustomMenuMod
     {
+        private const string BuildUtcMetadataKey = "BuildUtc";
+
         public override string GetVersion()
         {
             Assembly asm = typeof(DebugMod).Assembly;
@@ -37,6 +39,20 @@ namespace DebugMod
             string hash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
 
             return $"{ver}-{hash.Substring(0, 6)}";
+        }
+
+        private static string GetBuildUtc()
+        {
+            Assembly asm = typeof(DebugMod).Assembly;
+            foreach (AssemblyMetadataAttribute attribute in asm.GetCustomAttributes<AssemblyMetadataAttribute>())
+            {
+                if (attribute.Key == BuildUtcMetadataKey && !string.IsNullOrWhiteSpace(attribute.Value))
+                {
+                    return attribute.Value;
+                }
+            }
+
+            return "unknown";
         }
 
         private static GameManager _gm;
@@ -120,6 +136,9 @@ namespace DebugMod
         public override void Initialize()
         {
             instance.Log("Initializing");
+            string buildIdentity = $"Build identity: version={GetVersion()} built_utc={GetBuildUtc()}";
+            instance.Log(buildIdentity);
+            UnityEngine.Debug.Log("[DebugMod] " + buildIdentity);
 
             float startTime = Time.realtimeSinceStartup;
             instance.Log("Building MethodInfo dict...");
