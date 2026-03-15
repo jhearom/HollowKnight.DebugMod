@@ -92,6 +92,7 @@ namespace DebugMod.Hitbox
             {HitboxType.HazardRespawn, new HashSet<Collider2D>()},
             {HitboxType.Other, new HashSet<Collider2D>()},
         };
+        private readonly List<Vector2> polygonPointBuffer = new();
         private FrameStats lastFrameStats;
         private AggregateStats aggregateStats;
         private float lastActiveRefreshRealtime;
@@ -259,31 +260,19 @@ namespace DebugMod.Hitbox
                 {
                     case BoxCollider2D boxCollider2D:
                         frameStats.Boxes++;
-                        Vector2 halfSize = boxCollider2D.size / 2f;
-                        Vector2 topLeft = new(-halfSize.x, halfSize.y);
-                        Vector2 topRight = halfSize;
-                        Vector2 bottomRight = new(halfSize.x, -halfSize.y);
-                        Vector2 bottomLeft = -halfSize;
-                        List<Vector2> boxPoints = new List<Vector2>
-                        {
-                            topLeft, topRight, bottomRight, bottomLeft, topLeft
-                        };
-                        DrawPointSequence(boxPoints, camera, collider2D, hitboxType, lineWidth, ref frameStats);
+                        DrawBox(boxCollider2D, camera, hitboxType, lineWidth, ref frameStats);
                         break;
                     case EdgeCollider2D edgeCollider2D:
                         frameStats.Edges++;
-                        DrawPointSequence(new(edgeCollider2D.points), camera, collider2D, hitboxType, lineWidth, ref frameStats);
+                        DrawPointSequence(edgeCollider2D.points, edgeCollider2D.pointCount, camera, collider2D, hitboxType, lineWidth, closeLoop: false, ref frameStats);
                         break;
                     case PolygonCollider2D polygonCollider2D:
                         for (int i = 0; i < polygonCollider2D.pathCount; i++)
                         {
                             frameStats.PolygonPaths++;
-                            List<Vector2> polygonPoints = new(polygonCollider2D.GetPath(i));
-                            if (polygonPoints.Count > 0)
-                            {
-                                polygonPoints.Add(polygonPoints[0]);
-                            }
-                            DrawPointSequence(polygonPoints, camera, collider2D, hitboxType, lineWidth, ref frameStats);
+                            polygonPointBuffer.Clear();
+                            polygonCollider2D.GetPath(i, polygonPointBuffer);
+                            DrawPointSequence(polygonPointBuffer, polygonPointBuffer.Count, camera, collider2D, hitboxType, lineWidth, closeLoop: true, ref frameStats);
                         }
                         break;
                 }
@@ -302,15 +291,44 @@ namespace DebugMod.Hitbox
             GUI.depth = origDepth;
         }
 
-        private void DrawPointSequence(List<Vector2> points, Camera camera, Collider2D collider2D, HitboxType hitboxType, float lineWidth, ref FrameStats frameStats)
+        private void DrawBox(BoxCollider2D boxCollider2D, Camera camera, HitboxType hitboxType, float lineWidth, ref FrameStats frameStats)
         {
-            for (int i = 0; i < points.Count - 1; i++)
+            Vector2 halfSize = boxCollider2D.size / 2f;
+            Vector2 topLeft = new(-halfSize.x, halfSize.y);
+            Vector2 topRight = halfSize;
+            Vector2 bottomRight = new(halfSize.x, -halfSize.y);
+            Vector2 bottomLeft = -halfSize;
+
+            DrawLineSegment(camera, boxCollider2D, topLeft, topRight, hitboxType, lineWidth, ref frameStats);
+            DrawLineSegment(camera, boxCollider2D, topRight, bottomRight, hitboxType, lineWidth, ref frameStats);
+            DrawLineSegment(camera, boxCollider2D, bottomRight, bottomLeft, hitboxType, lineWidth, ref frameStats);
+            DrawLineSegment(camera, boxCollider2D, bottomLeft, topLeft, hitboxType, lineWidth, ref frameStats);
+        }
+
+        private void DrawPointSequence(IReadOnlyList<Vector2> points, int pointCount, Camera camera, Collider2D collider2D, HitboxType hitboxType, float lineWidth, bool closeLoop, ref FrameStats frameStats)
+        {
+            if (pointCount < 2)
             {
-                Vector2 pointA = LocalToScreenPoint(camera, collider2D, points[i]);
-                Vector2 pointB = LocalToScreenPoint(camera, collider2D, points[i + 1]);
-                frameStats.LineSegments++;
-                Drawing.DrawLine(pointA, pointB, hitboxType.Color, lineWidth, true);
+                return;
             }
+
+            for (int i = 0; i < pointCount - 1; i++)
+            {
+                DrawLineSegment(camera, collider2D, points[i], points[i + 1], hitboxType, lineWidth, ref frameStats);
+            }
+
+            if (closeLoop)
+            {
+                DrawLineSegment(camera, collider2D, points[pointCount - 1], points[0], hitboxType, lineWidth, ref frameStats);
+            }
+        }
+
+        private void DrawLineSegment(Camera camera, Collider2D collider2D, Vector2 start, Vector2 end, HitboxType hitboxType, float lineWidth, ref FrameStats frameStats)
+        {
+            Vector2 pointA = LocalToScreenPoint(camera, collider2D, start);
+            Vector2 pointB = LocalToScreenPoint(camera, collider2D, end);
+            frameStats.LineSegments++;
+            Drawing.DrawLine(pointA, pointB, hitboxType.Color, lineWidth, true);
         }
 
         public string[] GetStatusLines()
