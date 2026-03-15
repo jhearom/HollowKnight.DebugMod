@@ -6,7 +6,9 @@ using static DebugMod.SaveState;
 
 namespace DebugMod
 {
-    //Stored in separate class due to the amount of unique functionality
+    // Pantheon savestates are meant to restore an in-progress Pantheon run at the correct
+    // sequence/boss index, not to recreate Atrium door state. The critical requirement is
+    // that BossSequenceController is armed before the target boss scene loads.
     internal static class PanthSaveState
     {
         private readonly struct PantheonSequenceDefinition
@@ -32,6 +34,7 @@ namespace DebugMod
 
         public static bool IsPantheonSequence(string sequenceName) => TryResolveSequence(sequenceName, out _);
 
+        // Save enough Pantheon-specific state to reconstruct sequence progression during load.
         public static (string SequenceName, int BossIndex) SavePanthScene(string scene)
         {
             int BossIndex = BossSequenceController.BossIndex;
@@ -40,6 +43,8 @@ namespace DebugMod
             return (NormalizeSequenceName(sequenceName), BossIndex);
         }
 
+        // This must run before the Pantheon boss scene transition. BossSceneController.Awake()
+        // consumes the sequence setup, so restoring after the scene is active is too late.
         public static void LoadPanthScene(string SequenceName, int BossIndex)
         {
             if (!TryResolveSequence(SequenceName, out PantheonSequenceDefinition sequenceDefinition))
@@ -48,6 +53,7 @@ namespace DebugMod
                 return;
             }
 
+            // Reset first to avoid inheriting stale sequence state from a previous run/load.
             BossSequenceController.Reset();
 
             BossSequence sequence = Resources.Load<BossSequence>($"GG/{sequenceDefinition.ResourceName}");
@@ -57,12 +63,17 @@ namespace DebugMod
                 return;
             }
 
+            // SetupNewSequence initializes sequence state and builds the boss-scene setup for
+            // index 0. We then restore the saved index and rebuild the setup once more so the
+            // upcoming boss scene loads the correct Pantheon encounter.
             BossSequenceController.SetupNewSequence(sequence, BossSequenceController.ChallengeBindings.None, sequenceDefinition.PlayerDataKey);
             ReflectionHelper.SetField<int>(typeof(BossSequenceController), "bossIndex", BossIndex);
             ReflectionHelper.CallMethod(typeof(BossSequenceController), "SetupBossScene");
             isPanthState = true;
         }
 
+        // The first boss entry in a Pantheon run needs a short Dream Entry timing adjustment
+        // after load so the transition completes cleanly.
         public static IEnumerator SetupPanthTransition()
         {
             if (BossSequenceController.BossIndex == 0)
