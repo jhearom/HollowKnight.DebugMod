@@ -28,6 +28,7 @@ namespace DebugMod
 
         private static readonly HashSet<string> ThkEngagedBattleStates = new HashSet<string>(StringComparer.Ordinal)
         {
+            "Revisit",
             "Free Pause",
             "Struggle",
             "Break Antic",
@@ -270,7 +271,7 @@ namespace DebugMod
 
         private static bool IsThkScene(string? sceneName)
         {
-            return string.Equals(sceneName, ThkSceneName, StringComparison.Ordinal);
+            return string.Equals(sceneName, ThkSceneName, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool ShouldForceThkGateCloseOnLoad(out string reason)
