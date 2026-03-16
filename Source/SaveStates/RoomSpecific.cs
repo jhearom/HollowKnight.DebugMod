@@ -173,7 +173,18 @@ namespace DebugMod
 
         internal static void ReconcileThkGateStateAfterSavestateLoad(string scene)
         {
-            if (!IsThkScene(scene) || IsThkGateCloseLayerActive() || !ShouldForceThkGateCloseOnLoad())
+            if (!IsThkScene(scene))
+            {
+                return;
+            }
+
+            bool layerActive = IsThkGateCloseLayerActive();
+            bool shouldForce = ShouldForceThkGateCloseOnLoad(out string reason);
+            LogThkDiagnostic(
+                "savestate_load_check",
+                $"reason={reason}; layer={DescribeThkGateLayer()}");
+
+            if (layerActive || !shouldForce)
             {
                 return;
             }
@@ -250,6 +261,9 @@ namespace DebugMod
                 self.GameObjectName == ThkBossControlName &&
                 IsThkScene(GameManager.instance?.sceneName))
             {
+                LogThkDiagnostic(
+                    "battle_start_hook",
+                    $"state={stateName}; layer={DescribeThkGateLayer()}");
                 TryEnsureThkGateCloseLayer("battle_start_roar_antic");
             }
         }
@@ -259,16 +273,24 @@ namespace DebugMod
             return string.Equals(sceneName, ThkSceneName, StringComparison.Ordinal);
         }
 
-        private static bool ShouldForceThkGateCloseOnLoad()
+        private static bool ShouldForceThkGateCloseOnLoad(out string reason)
         {
             GameObject thk = GameObject.Find(ThkBossName);
             if (thk != null && thk.activeInHierarchy)
             {
+                reason = "boss_active";
                 return true;
             }
 
             PlayMakerFSM? battleStartFsm = GameObject.Find(ThkBossControlName)?.LocateMyFSM(ThkBattleStartFsmName);
-            return battleStartFsm != null && ThkEngagedBattleStates.Contains(battleStartFsm.ActiveStateName);
+            if (battleStartFsm == null)
+            {
+                reason = "battle_start_missing";
+                return false;
+            }
+
+            reason = $"battle_state={battleStartFsm.ActiveStateName}";
+            return ThkEngagedBattleStates.Contains(battleStartFsm.ActiveStateName);
         }
 
         private static bool IsThkGateCloseLayerActive()
@@ -289,20 +311,55 @@ namespace DebugMod
             GameObject gateRoot = GameObject.Find(ThkGateRootName);
             if (gateRoot == null)
             {
+                LogThkDiagnostic(source, "gate_root=missing");
                 return;
             }
 
+            string before = DescribeThkGateLayer();
             bool changed = false;
             changed |= SetChildActive(gateRoot.transform, ThkGateArtName, true);
             changed |= SetChildActive(gateRoot.transform, ThkGateColliderName, true);
             changed |= SetChildActive(gateRoot.transform, ThkGateCameraLockName, true);
+            string after = DescribeThkGateLayer();
 
             if (changed)
             {
-                string message = $"THK gate-close layer restored via {source}";
-                Console.AddLine(message);
-                DebugMod.instance.Log("[THK] " + message);
+                LogThkDiagnostic(source, $"restored; before={before}; after={after}");
             }
+            else
+            {
+                LogThkDiagnostic(source, $"no_change; before={before}; after={after}");
+            }
+        }
+
+        private static string DescribeThkGateLayer()
+        {
+            GameObject gateRoot = GameObject.Find(ThkGateRootName);
+            if (gateRoot == null)
+            {
+                return "gate_root=missing";
+            }
+
+            Transform root = gateRoot.transform;
+            return $"art={DescribeChildState(root, ThkGateArtName)}, collider={DescribeChildState(root, ThkGateColliderName)}, cameraLock={DescribeChildState(root, ThkGateCameraLockName)}";
+        }
+
+        private static string DescribeChildState(Transform parent, string childName)
+        {
+            Transform child = parent.Find(childName);
+            if (child == null)
+            {
+                return "missing";
+            }
+
+            return $"self:{child.gameObject.activeSelf},hier:{child.gameObject.activeInHierarchy}";
+        }
+
+        private static void LogThkDiagnostic(string source, string message)
+        {
+            string fullMessage = $"[THK] {source}: {message}";
+            Console.AddLine(fullMessage);
+            DebugMod.instance.Log(fullMessage);
         }
 
         private static bool IsChildActive(Transform parent, string childName)
