@@ -217,6 +217,7 @@ namespace DebugMod
             GUIController.Instance.BuildMenus();
             SceneWatcher.Init();
             PlayMakerTraceManager.Initialize();
+            RoomSpecific.InitializeHooks();
 
             KeyBindLock = false;
             TimeScaleActive = false;

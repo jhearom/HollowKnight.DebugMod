@@ -399,6 +399,9 @@ namespace DebugMod
                 Console.AddLine("Performing Room Specific Option " + data.roomSpecificOptions);
                 RoomSpecific.DoRoomSpecific(data.saveScene, data.roomSpecificOptions, data.specialIndex);
             }
+
+            RoomSpecific.ReconcileThkGateStateAfterSavestateLoad(data.saveScene);
+
             //removes things like bench storage no clip float etc
             if (DebugMod.settings.SaveStateGlitchFixes) SaveStateGlitchFixes();
 

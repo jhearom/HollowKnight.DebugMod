@@ -16,8 +16,46 @@ namespace DebugMod
 {
     public static class RoomSpecific
     {
+        private const string ThkSceneName = "room_final_boss_core";
+        private const string ThkGateRootName = "Gate";
+        private const string ThkGateArtName = "Final_Boss_Gate0004";
+        private const string ThkGateColliderName = "Collider";
+        private const string ThkGateCameraLockName = "CameraLockArea B";
+        private const string ThkBossControlName = "Boss Control";
+        private const string ThkBattleStartFsmName = "Battle Start";
+        private const string ThkRoarAnticStateName = "Roar Antic";
+        private const string ThkBossName = "Hollow Knight Boss";
+
+        private static readonly HashSet<string> ThkEngagedBattleStates = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "Free Pause",
+            "Struggle",
+            "Break Antic",
+            "Break",
+            "Fall",
+            "Land",
+            "Roar Antic",
+            "Roar",
+            "Particle Burst",
+            "Particle End",
+            "Fight Start"
+        };
+
+        private static bool _hooksInitialized;
+
         //This class is intended to recreate some scenarios, with more accuracy than that of the savestate class. 
         //This should be eventually included to compatible with savestates, stored in the same location for easier access.
+        internal static void InitializeHooks()
+        {
+            if (_hooksInitialized)
+            {
+                return;
+            }
+
+            On.HutongGames.PlayMaker.Fsm.SetState += OnSetState;
+            _hooksInitialized = true;
+        }
+
         #region Rooms
         private static void EnterSpiderTownTrap(int index) //Deepnest_Spider_Town
         {
@@ -133,6 +171,16 @@ namespace DebugMod
 
         #endregion
 
+        internal static void ReconcileThkGateStateAfterSavestateLoad(string scene)
+        {
+            if (!IsThkScene(scene) || IsThkGateCloseLayerActive() || !ShouldForceThkGateCloseOnLoad())
+            {
+                return;
+            }
+
+            TryEnsureThkGateCloseLayer("savestate_load");
+        }
+
         //TODO: Add functionality for checking ALL room specifics :(
         internal static (string value, int index) SaveRoomSpecific(string scene)
         {
@@ -189,6 +237,91 @@ namespace DebugMod
         private static PlayMakerFSM FindFsmGlobally(string gameObjectName, string fsmName)
         {
             return GameObject.Find(gameObjectName).LocateMyFSM(fsmName);
+        }
+
+        private static void OnSetState(On.HutongGames.PlayMaker.Fsm.orig_SetState orig, HutongGames.PlayMaker.Fsm self, string stateName)
+        {
+            orig(self, stateName);
+
+            if (_hooksInitialized &&
+                stateName == ThkRoarAnticStateName &&
+                self != null &&
+                self.Name == ThkBattleStartFsmName &&
+                self.GameObjectName == ThkBossControlName &&
+                IsThkScene(GameManager.instance?.sceneName))
+            {
+                TryEnsureThkGateCloseLayer("battle_start_roar_antic");
+            }
+        }
+
+        private static bool IsThkScene(string? sceneName)
+        {
+            return string.Equals(sceneName, ThkSceneName, StringComparison.Ordinal);
+        }
+
+        private static bool ShouldForceThkGateCloseOnLoad()
+        {
+            GameObject thk = GameObject.Find(ThkBossName);
+            if (thk != null && thk.activeInHierarchy)
+            {
+                return true;
+            }
+
+            PlayMakerFSM? battleStartFsm = GameObject.Find(ThkBossControlName)?.LocateMyFSM(ThkBattleStartFsmName);
+            return battleStartFsm != null && ThkEngagedBattleStates.Contains(battleStartFsm.ActiveStateName);
+        }
+
+        private static bool IsThkGateCloseLayerActive()
+        {
+            GameObject gateRoot = GameObject.Find(ThkGateRootName);
+            if (gateRoot == null)
+            {
+                return false;
+            }
+
+            return IsChildActive(gateRoot.transform, ThkGateArtName) &&
+                   IsChildActive(gateRoot.transform, ThkGateColliderName) &&
+                   IsChildActive(gateRoot.transform, ThkGateCameraLockName);
+        }
+
+        private static void TryEnsureThkGateCloseLayer(string source)
+        {
+            GameObject gateRoot = GameObject.Find(ThkGateRootName);
+            if (gateRoot == null)
+            {
+                return;
+            }
+
+            bool changed = false;
+            changed |= SetChildActive(gateRoot.transform, ThkGateArtName, true);
+            changed |= SetChildActive(gateRoot.transform, ThkGateColliderName, true);
+            changed |= SetChildActive(gateRoot.transform, ThkGateCameraLockName, true);
+
+            if (changed)
+            {
+                string message = $"THK gate-close layer restored via {source}";
+                Console.AddLine(message);
+                DebugMod.instance.Log("[THK] " + message);
+            }
+        }
+
+        private static bool IsChildActive(Transform parent, string childName)
+        {
+            Transform child = parent.Find(childName);
+            return child != null && child.gameObject.activeSelf;
+        }
+
+        private static bool SetChildActive(Transform parent, string childName, bool active)
+        {
+            Transform child = parent.Find(childName);
+            if (child == null)
+            {
+                return false;
+            }
+
+            bool changed = child.gameObject.activeSelf != active;
+            child.gameObject.SetActive(active);
+            return changed;
         }
     }
 }
