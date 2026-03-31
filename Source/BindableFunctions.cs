@@ -704,6 +704,54 @@ namespace DebugMod
             Console.SaveHistory();
         }
 
+        [BindableMethod(name = "Core Carry Mode", category = "Experiments")]
+        public static void ToggleUumuuCoreCarryMode()
+        {
+            if (UumuuCoreExperiment.Instance == null)
+            {
+                Console.AddLine("Uumuu core experiment controller is unavailable");
+                return;
+            }
+
+            UumuuCoreExperiment.Instance.ToggleCoreCarryMode();
+        }
+
+        [BindableMethod(name = "Explode Cores", category = "Experiments")]
+        public static void ExplodeUumuuCores()
+        {
+            if (UumuuCoreExperiment.Instance == null)
+            {
+                Console.AddLine("Uumuu core experiment controller is unavailable");
+                return;
+            }
+
+            UumuuCoreExperiment.Instance.ExplodeTrackedCores();
+        }
+
+        [BindableMethod(name = "Uumuu Trace", category = "Experiments")]
+        public static void ToggleUumuuTrace()
+        {
+            if (UumuuCoreExperiment.Instance == null)
+            {
+                Console.AddLine("Uumuu core experiment controller is unavailable");
+                return;
+            }
+
+            UumuuCoreExperiment.Instance.ToggleTrace();
+        }
+
+        [BindableMethod(name = "Dump Uumuu Trace", category = "Experiments")]
+        public static void DumpUumuuTrace()
+        {
+            if (UumuuCoreExperiment.Instance == null)
+            {
+                Console.AddLine("Uumuu core experiment controller is unavailable");
+                return;
+            }
+
+            UumuuCoreExperiment.Instance.DumpTrace();
+        }
+
         #endregion
 
         #region Cheats

@@ -39,8 +39,6 @@ namespace DebugMod
             buttonTransform.anchorMin = position;
             buttonTransform.anchorMax = position;
 
-            Object.DontDestroyOnLoad(buttonObj);
-
             if (font != null && text != null)
             {
                 textObj = new GameObject();
@@ -52,7 +50,6 @@ namespace DebugMod
                 t.alignment = TextAnchor.MiddleCenter;
                 textObj.transform.SetParent(buttonObj.transform, false);
 
-                Object.DontDestroyOnLoad(textObj);
             }
 
             active = true;

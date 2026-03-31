@@ -127,7 +127,7 @@ namespace DebugMod
             if (DebugMod.GetSceneName() == "Menu_Title") return;
 
             //Handle keybinds
-            foreach (KeyValuePair<string, int> bind in DebugMod.settings.binds)
+            foreach (KeyValuePair<string, int> bind in DebugMod.settings.binds.ToList())
             {
                 if (DebugMod.bindMethods.ContainsKey(bind.Key))
                 {

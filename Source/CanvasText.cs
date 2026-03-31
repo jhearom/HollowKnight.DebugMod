@@ -43,8 +43,6 @@ namespace DebugMod
             textTransform.anchorMin = position;
             textTransform.anchorMax = position;
 
-            Object.DontDestroyOnLoad(textObj);
-
             active = true;
         }
 

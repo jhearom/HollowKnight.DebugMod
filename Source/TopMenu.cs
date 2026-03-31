@@ -23,6 +23,10 @@ namespace DebugMod
             panel.AddButton("Set Spawn", GUIController.Instance.images["ButtonRect"], new Vector2(246f, 28f), Vector2.zero, SetSpawnClicked, buttonRect, GUIController.Instance.trajanBold, "Set Spawn");
             panel.AddButton("Respawn", GUIController.Instance.images["ButtonRect"], new Vector2(346f, 28f), Vector2.zero, RespawnClicked, buttonRect, GUIController.Instance.trajanBold, "Respawn");
             panel.AddButton("Dump Log", GUIController.Instance.images["ButtonRect"], new Vector2(446f, 28f), Vector2.zero, DumpLogClicked, buttonRect, GUIController.Instance.trajanBold, "Dump Log");
+            panel.AddButton("Core Carry", GUIController.Instance.images["ButtonRect"], new Vector2(546f, 28f), Vector2.zero, CoreCarryClicked, buttonRect, GUIController.Instance.trajanBold, "Carry Mode", 11);
+            panel.AddButton("Explode Cores", GUIController.Instance.images["ButtonRect"], new Vector2(646f, 28f), Vector2.zero, ExplodeCoresClicked, buttonRect, GUIController.Instance.trajanBold, "Explode", 11);
+            panel.AddButton("Uumuu Trace", GUIController.Instance.images["ButtonRect"], new Vector2(746f, 28f), Vector2.zero, UumuuTraceClicked, buttonRect, GUIController.Instance.trajanBold, "Uumuu Trace", 10);
+            panel.AddButton("Dump U Trace", GUIController.Instance.images["ButtonRect"], new Vector2(846f, 28f), Vector2.zero, DumpUumuuTraceClicked, buttonRect, GUIController.Instance.trajanBold, "Dump Trace", 10);
             panel.AddButton("Cheats", GUIController.Instance.images["ButtonRect"], new Vector2(46f, 68f), Vector2.zero, CheatsClicked, buttonRect, GUIController.Instance.trajanBold, "Cheats");
             panel.AddButton("Charms", GUIController.Instance.images["ButtonRect"], new Vector2(146f, 68f), Vector2.zero, CharmsClicked, buttonRect, GUIController.Instance.trajanBold, "Charms");
             panel.AddButton("Skills", GUIController.Instance.images["ButtonRect"], new Vector2(246f, 68f), Vector2.zero, SkillsClicked, buttonRect, GUIController.Instance.trajanBold, "Skills");
@@ -194,6 +198,11 @@ namespace DebugMod
 
             }
 
+            UumuuCoreExperiment experiment = UumuuCoreExperiment.Instance;
+            Color activeColor = new Color(244f / 255f, 127f / 255f, 32f / 255f);
+            panel.GetButton("Core Carry").SetTextColor(experiment != null && experiment.CoreCarryModeEnabled ? activeColor : Color.white);
+            panel.GetButton("Uumuu Trace").SetTextColor(experiment != null && experiment.TraceEnabled ? activeColor : Color.white);
+
             if (panel.GetPanel("Bosses Panel").active)
             {
                 panel.GetButton("Failed Champ", "Bosses Panel").SetTextColor(PlayerData.instance.falseKnightDreamDefeated ? new Color(244f / 255f, 127f / 255f, 32f / 255f) : Color.white);
@@ -330,6 +339,26 @@ namespace DebugMod
         private static void DumpLogClicked(string buttonName)
         {
             BindableFunctions.DumpConsoleLog();
+        }
+
+        private static void CoreCarryClicked(string buttonName)
+        {
+            BindableFunctions.ToggleUumuuCoreCarryMode();
+        }
+
+        private static void ExplodeCoresClicked(string buttonName)
+        {
+            BindableFunctions.ExplodeUumuuCores();
+        }
+
+        private static void UumuuTraceClicked(string buttonName)
+        {
+            BindableFunctions.ToggleUumuuTrace();
+        }
+
+        private static void DumpUumuuTraceClicked(string buttonName)
+        {
+            BindableFunctions.DumpUumuuTrace();
         }
 
         private static void CheatsClicked(string buttonName)

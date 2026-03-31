@@ -63,6 +63,30 @@ namespace DebugMod
         
         internal static Dictionary<KeyCode, int> alphaKeyDict = new Dictionary<KeyCode, int>();
 
+        private static readonly Dictionary<string, KeyCode> DefaultBinds = new Dictionary<string, KeyCode>
+        {
+            { "Toggle All UI", KeyCode.F1 },
+            { "Toggle Info", KeyCode.F2 },
+            { "Toggle Top Menu", KeyCode.F3 },
+            { "Toggle Console", KeyCode.F4 },
+            { "Alt. Info Switch", KeyCode.F6 },
+            { "Force Camera Follow", KeyCode.F8 },
+            { "Toggle Enemy Panel", KeyCode.F9 },
+            { "Self Damage", KeyCode.F10 },
+            { "Toggle Binds", KeyCode.BackQuote },
+            { "Nail Damage +4", KeyCode.Equals },
+            { "Nail Damage -4", KeyCode.Minus },
+            { "Increase Timescale", KeyCode.KeypadPlus },
+            { "Decrease Timescale", KeyCode.KeypadMinus },
+            { "Toggle Hero Light", KeyCode.Home },
+            { "Toggle Vignette", KeyCode.Insert },
+            { "Zoom In", KeyCode.PageUp },
+            { "Zoom Out", KeyCode.PageDown },
+            { "Reset Camera Zoom", KeyCode.End },
+            { "Toggle HUD", KeyCode.Delete },
+            { "Hide Hero", KeyCode.Backspace },
+        };
+
         static int alphaStart;
         static int alphaEnd;
         
@@ -71,6 +95,7 @@ namespace DebugMod
             instance = this;
 
             instance.Log("Initializing");
+            LogBuildIdentity();
 
             float startTime = Time.realtimeSinceStartup;
             instance.Log("Building MethodInfo dict...");
@@ -93,36 +118,23 @@ namespace DebugMod
             instance.Log("Done! Time taken: " + (Time.realtimeSinceStartup - startTime) + "s. Found " + bindMethods.Count + " methods");
 
             settings = GlobalSettings;
-            
-            if (settings.FirstRun)
+            bool firstRun = settings.FirstRun;
+
+            if (settings.binds == null)
+            {
+                settings.binds = new Dictionary<string, int>();
+            }
+
+            if (firstRun)
             {
                 instance.Log("First run detected, setting default binds");
 
                 settings.FirstRun = false;
                 settings.binds.Clear();
-
-                settings.binds.Add("Toggle All UI", (int) KeyCode.F1);
-                settings.binds.Add("Toggle Info", (int) KeyCode.F2);
-                settings.binds.Add("Toggle Menu", (int) KeyCode.F3);
-                settings.binds.Add("Toggle Console", (int) KeyCode.F4);
-                settings.binds.Add("Full/Min Info Switch", (int) KeyCode.F6);
-                settings.binds.Add("Force Camera Follow", (int) KeyCode.F8);
-                settings.binds.Add("Toggle Enemy Panel", (int) KeyCode.F9);
-                settings.binds.Add("Self Damage", (int) KeyCode.F10);
-                settings.binds.Add("Toggle Binds", (int) KeyCode.BackQuote);
-                settings.binds.Add("Nail Damage +4", (int) KeyCode.Equals);
-                settings.binds.Add("Nail Damage -4", (int) KeyCode.Minus);
-                settings.binds.Add("Increase Timescale", (int) KeyCode.KeypadPlus);
-                settings.binds.Add("Decrease Timescale", (int) KeyCode.KeypadMinus);
-                settings.binds.Add("Toggle Hero Light", (int) KeyCode.Home);
-                settings.binds.Add("Toggle Vignette", (int) KeyCode.Insert);
-                settings.binds.Add("Zoom In", (int) KeyCode.PageUp);
-                settings.binds.Add("Zoom Out", (int) KeyCode.PageDown);
-                settings.binds.Add("Reset Camera Zoom", (int) KeyCode.End);
-                settings.binds.Add("Toggle HUD", (int) KeyCode.Delete);
-                settings.binds.Add("Hide Hero", (int) KeyCode.Backspace);
             }
-            
+
+            RepairDefaultBinds(!firstRun);
+            LogTrackedBinds();
 
             if (settings.NumPadForSaveStates)
             {
@@ -145,9 +157,10 @@ namespace DebugMod
             }
             
 
-            UnityEngine.SceneManagement.SceneManager.activeSceneChanged += LevelActivated;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += LevelActivated;
             GameObject UIObj = new GameObject();
             UIObj.AddComponent<GUIController>();
+            UIObj.AddComponent<UumuuCoreExperiment>();
             Object.DontDestroyOnLoad(UIObj);
             
             saveStateManager = new SaveStateManager();
@@ -198,7 +211,7 @@ namespace DebugMod
             _loadingChar = true;
         }
 
-        private void LevelActivated(Scene sceneFrom, Scene sceneTo)
+        private void LevelActivated(Scene sceneTo, LoadSceneMode mode)
         {
             string sceneName = sceneTo.name;
             
@@ -270,6 +283,73 @@ namespace DebugMod
             HC.ResetState();
 
             GM.LoadScene(scenename);
+        }
+
+        private static void RepairDefaultBinds(bool preserveExisting)
+        {
+            MigrateBindName("Toggle Menu", "Toggle Top Menu");
+            MigrateBindName("Full/Min Info Switch", "Alt. Info Switch");
+
+            foreach (KeyValuePair<string, KeyCode> entry in DefaultBinds)
+            {
+                if (!preserveExisting || !settings.binds.ContainsKey(entry.Key))
+                {
+                    settings.binds[entry.Key] = (int)entry.Value;
+                }
+            }
+        }
+
+        private static void MigrateBindName(string oldName, string newName)
+        {
+            if (!settings.binds.TryGetValue(oldName, out int keyCode))
+            {
+                return;
+            }
+
+            if (!settings.binds.ContainsKey(newName))
+            {
+                settings.binds[newName] = keyCode;
+                instance.Log("Migrated legacy bind \"" + oldName + "\" -> \"" + newName + "\"");
+            }
+
+            settings.binds.Remove(oldName);
+        }
+
+        private static void LogTrackedBinds()
+        {
+            LogTrackedBind("Toggle All UI");
+            LogTrackedBind("Toggle Top Menu");
+            LogTrackedBind("Toggle Console");
+            LogTrackedBind("Toggle Binds");
+        }
+
+        private static void LogTrackedBind(string bindName)
+        {
+            if (settings.binds.TryGetValue(bindName, out int keyCode))
+            {
+                instance.Log("Bind " + bindName + " = " + ((KeyCode)keyCode));
+            }
+            else
+            {
+                instance.LogWarn("Bind missing: " + bindName);
+            }
+        }
+
+        private static void LogBuildIdentity()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string assemblyPath = assembly.Location;
+            instance.Log("Build UTC: " + BuildInfo.BuildUtc);
+
+            if (string.IsNullOrEmpty(assemblyPath))
+            {
+                instance.Log("Build identity: assembly location unavailable");
+                return;
+            }
+
+            string fileName = Path.GetFileName(assemblyPath);
+            DateTime lastWriteUtc = File.GetLastWriteTimeUtc(assemblyPath);
+            instance.Log("Build identity: " + fileName + " @ " + lastWriteUtc.ToString("yyyy-MM-ddTHH:mm:ssZ") + " from " + assemblyPath);
         }
     }
 }

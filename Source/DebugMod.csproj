@@ -12,7 +12,12 @@
         <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>latest</LangVersion>
-        <ModsDirectory>C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\Mods</ModsDirectory>
+        <HollowKnightFolder Condition=" '$(HollowKnightFolder)' == '' ">C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed</HollowKnightFolder>
+        <AssemblyCSharpPath Condition=" '$(AssemblyCSharpPath)' == '' ">$(HollowKnightFolder)/Assembly-CSharp.dll</AssemblyCSharpPath>
+        <NetStandardPath Condition=" '$(NetStandardPath)' == '' ">/usr/lib/mono/4.7.2-api/Facades/netstandard.dll</NetStandardPath>
+        <ModsDirectory Condition=" '$(ModsDirectory)' == '' ">$(HollowKnightFolder)/Mods</ModsDirectory>
+        <OutputDirectory Condition=" '$(OutputDirectory)' == '' ">$(ModsDirectory)</OutputDirectory>
+        <BuildUtc Condition=" '$(BuildUtc)' == '' ">$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))</BuildUtc>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -86,41 +91,46 @@
         <EmbeddedResource Include="Images\ScrollBarArrowRight.png" />
     </ItemGroup>
     <ItemGroup>
-        <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\Assembly-CSharp.dll</HintPath>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>$(AssemblyCSharpPath)</HintPath>
+          <Private>False</Private>
         </Reference>
         <Reference Include="PlayMaker, Version=1.6.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\PlayMaker.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/PlayMaker.dll</HintPath>
+        </Reference>
+        <Reference Include="netstandard">
+          <HintPath>$(NetStandardPath)</HintPath>
+          <Private>False</Private>
         </Reference>
         <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\System.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/System.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.CoreModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.ImageConversionModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.IMGUIModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.JSONSerializeModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.JSONSerializeModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.Physics2DModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.TextRenderingModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.UI.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight 1.4 Modded\hollow_knight_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+          <HintPath>$(HollowKnightFolder)/UnityEngine.UIModule.dll</HintPath>
         </Reference>
     </ItemGroup>
     <ItemGroup>
@@ -150,9 +160,26 @@
         <Compile Include="SaveStatePanel.cs" />
         <Compile Include="Settings.cs" />
         <Compile Include="TopMenu.cs" />
+        <Compile Include="UumuuCoreExperiment.cs" />
+        <Compile Include="UumuuTraceLogger.cs" />
+        <Compile Include="$(IntermediateOutputPath)BuildInfo.g.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+    <Target Name="GenerateBuildInfo" BeforeTargets="BeforeBuild">
+        <MakeDir Directories="$(IntermediateOutputPath)" />
+        <WriteLinesToFile
+            File="$(IntermediateOutputPath)BuildInfo.g.cs"
+            Lines='namespace DebugMod
+{
+    internal static class BuildInfo
+    {
+        internal const string BuildUtc = "$(BuildUtc)"%3B
+    }
+}'
+            Overwrite="true" />
+    </Target>
     <Target Name="CopyMod" AfterTargets="PostBuildEvent">
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsDirectory)" SkipUnchangedFiles="true" />
+        <MakeDir Directories="$(OutputDirectory)/$(TargetName)" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(OutputDirectory)/$(TargetName)" SkipUnchangedFiles="true" />
     </Target>
 </Project>

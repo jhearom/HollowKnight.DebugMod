@@ -39,8 +39,6 @@ namespace DebugMod
             imageTransform.SetScaleX(size.x / subSprite.width);
             imageTransform.SetScaleY(size.y / subSprite.height);
 
-            Object.DontDestroyOnLoad(imageObj);
-
             active = true;
         }
 
