@@ -202,12 +202,9 @@ namespace DebugMod
                 ColoSaveState.LoadColoScene(scene, options);
                 return;
             }
-            //TODO: Fix SetupNewBossScene() in PanthSaveState.cs so we can call LoadPanthScene here
-            
-            if (PanthSaveState.panthSequences.Contains(options))
+            if (PanthSaveState.IsPantheonSequence(options))
             {
-                //Console.AddLine("Loading Pantheon Sequencer");
-                //PanthSaveState.LoadPanthScene(options, specialIndex);
+                // Pantheon restore must still be armed before the scene transition path.
                 return;
             }
             
