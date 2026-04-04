@@ -102,12 +102,6 @@ namespace DebugMod
         internal static bool savestateFixes = true;
         public static bool overrideLoadLockout = false;
 
-        internal static GameObject Panth1Prefab;
-        internal static GameObject Panth2Prefab;
-        internal static GameObject Panth3Prefab;
-        internal static GameObject Panth4Prefab;
-        internal static GameObject Panth5Prefab;
-
         internal static Dictionary<string, (string category, bool allowLock, Action method)> bindMethods = new();
         internal static Dictionary<string, (string category, bool allowLock, Action method)> AdditionalBindMethods = new();
 
@@ -212,21 +206,6 @@ namespace DebugMod
             Console.AddLine("New session started " + DateTime.Now);
         }
 
-        public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
-        {
-            Panth1Prefab = preloadedObjects["GG_Atrium"]["GG_Challenge_Door (1)"];
-            Panth2Prefab = preloadedObjects["GG_Atrium"]["GG_Challenge_Door (2)"];
-            Panth3Prefab = preloadedObjects["GG_Atrium"]["GG_Challenge_Door (3)"];
-            Panth4Prefab = preloadedObjects["GG_Atrium"]["GG_Challenge_Door (4)"];
-            Panth5Prefab = preloadedObjects["GG_Atrium_Roof"]["GG_Final_Challenge_Door"];
-            Object.DontDestroyOnLoad(Panth1Prefab);
-            Object.DontDestroyOnLoad(Panth2Prefab);
-            Object.DontDestroyOnLoad(Panth3Prefab);
-            Object.DontDestroyOnLoad(Panth4Prefab);
-            Object.DontDestroyOnLoad(Panth5Prefab);
-            base.Initialize(preloadedObjects);
-        }
-
         public DebugMod()
         {
             instance = this;
@@ -322,19 +301,6 @@ namespace DebugMod
             PlayMakerTraceManager.AutoFlushOnApplicationQuit();
             SaveGlobalSettings();
             instance.Log("Saved");
-        }
-
-        //preloading required for pantheon savestates
-        public override List<(string, string)> GetPreloadNames()
-        {
-            return new List<(string, string)>
-            {
-                ("GG_Atrium", "GG_Challenge_Door (1)"),
-                ("GG_Atrium", "GG_Challenge_Door (2)"),
-                ("GG_Atrium", "GG_Challenge_Door (3)"),
-                ("GG_Atrium", "GG_Challenge_Door (4)"),
-                ("GG_Atrium_Roof", "GG_Final_Challenge_Door"),
-        };
         }
 
         private int PlayerDamaged(int damageAmount)
