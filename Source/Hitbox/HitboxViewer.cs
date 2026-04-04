@@ -8,7 +8,7 @@ namespace DebugMod.Hitbox
     public class HitboxViewer
     {
         public static int State { get; private set; }
-        private HitboxRender hitboxRender;
+        private HitboxRender? hitboxRender;
 
         public void Load()
         {
@@ -18,6 +18,7 @@ namespace DebugMod.Hitbox
             
             
             ModHooks.ColliderCreateHook += UpdateHitboxRender;
+            ModHooks.OnEnableEnemyHook += UpdateEnemyHitboxRender;
 
             CreateHitboxRender();
         }
@@ -28,6 +29,7 @@ namespace DebugMod.Hitbox
             UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= CreateHitboxRender;
             
             ModHooks.ColliderCreateHook -= UpdateHitboxRender;
+            ModHooks.OnEnableEnemyHook -= UpdateEnemyHitboxRender;
             DestroyHitboxRender();
         }
 
@@ -53,10 +55,16 @@ namespace DebugMod.Hitbox
 
         private void UpdateHitboxRender(GameObject go)
         {
-            if (hitboxRender != null)
+            if (hitboxRender != null && go != null)
             {
                 hitboxRender.UpdateHitbox(go);
             }
+        }
+
+        private bool UpdateEnemyHitboxRender(GameObject go, bool isAlreadyDead)
+        {
+            UpdateHitboxRender(go);
+            return isAlreadyDead;
         }
     }
 }
