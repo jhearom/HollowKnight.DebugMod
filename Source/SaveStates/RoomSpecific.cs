@@ -5,12 +5,10 @@ using System.Linq;
 using System.Text;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using IL.HutongGames.PlayMaker.Actions;
 using HutongGames;
 using TeamCherry;
 using UnityEngine;
 using Modding.Utils;
-using System.Drawing.Text;
 
 namespace DebugMod
 {
@@ -23,8 +21,11 @@ namespace DebugMod
         private const string ThkGateCameraLockName = "CameraLockArea B";
         private const string ThkBossControlName = "Boss Control";
         private const string ThkBattleStartFsmName = "Battle Start";
+        private const string ThkControlFsmName = "Control";
+        private const string ThkStunControlFsmName = "Stun Control";
         private const string ThkRoarAnticStateName = "Roar Antic";
         private const string ThkBossName = "Hollow Knight Boss";
+        private const string ThkMonitorObjectName = "DebugMod.ThkDstabPuppetMonitor";
 
         private static readonly HashSet<string> ThkEngagedBattleStates = new HashSet<string>(StringComparer.Ordinal)
         {
@@ -54,7 +55,35 @@ namespace DebugMod
             }
 
             On.HutongGames.PlayMaker.Fsm.SetState += OnSetState;
+            On.HutongGames.PlayMaker.Actions.SendRandomEventV3.OnEnter += OnSendRandomEventV3OnEnter;
+            On.HealthManager.TakeDamage += OnHealthManagerTakeDamage;
+            EnsureThkMonitor();
             _hooksInitialized = true;
+        }
+
+        internal static bool IsThkSceneActive()
+        {
+            return IsThkScene(GameManager.instance != null ? GameManager.instance.sceneName : null);
+        }
+
+        internal static void PrintThkDstabPuppetStatus()
+        {
+            EnsureThkMonitor();
+            string summary = ThkDstabPuppetMonitor.Instance != null
+                ? ThkDstabPuppetMonitor.Instance.GetStatusSummary()
+                : "THK assist monitor unavailable";
+
+            Console.AddLine(summary);
+            DebugMod.instance.Log("[THK] " + summary);
+        }
+
+        internal static void SyncThkDstabPuppetSettings()
+        {
+            EnsureThkMonitor();
+            if (ThkDstabPuppetMonitor.Instance != null)
+            {
+                ThkDstabPuppetMonitor.Instance.OnSettingsChanged();
+            }
         }
 
         #region Rooms
@@ -248,6 +277,25 @@ namespace DebugMod
             orig(self, stateName);
 
             if (_hooksInitialized &&
+                self != null &&
+                self.GameObjectName == ThkBossName &&
+                IsThkSceneActive())
+            {
+                EnsureThkMonitor();
+                if (ThkDstabPuppetMonitor.Instance != null)
+                {
+                    if (self.Name == ThkControlFsmName)
+                    {
+                        ThkDstabPuppetMonitor.Instance.HandleControlStateChanged(GameObject.Find(ThkBossName)?.LocateMyFSM(ThkControlFsmName), stateName);
+                    }
+                    else if (self.Name == ThkStunControlFsmName)
+                    {
+                        ThkDstabPuppetMonitor.Instance.HandleStunControlStateChanged(GameObject.Find(ThkBossName)?.LocateMyFSM(ThkStunControlFsmName), stateName);
+                    }
+                }
+            }
+
+            if (_hooksInitialized &&
                 stateName == ThkRoarAnticStateName &&
                 self != null &&
                 self.Name == ThkBattleStartFsmName &&
@@ -255,6 +303,39 @@ namespace DebugMod
                 IsThkScene(GameManager.instance?.sceneName))
             {
                 TryEnsureThkGateCloseLayer("battle_start_roar_antic");
+            }
+        }
+
+        private static void OnSendRandomEventV3OnEnter(On.HutongGames.PlayMaker.Actions.SendRandomEventV3.orig_OnEnter orig, SendRandomEventV3 self)
+        {
+            EnsureThkMonitor();
+            if (ThkDstabPuppetMonitor.Instance != null && ThkDstabPuppetMonitor.Instance.TryHandleSelector(self))
+            {
+                return;
+            }
+
+            orig(self);
+        }
+
+        private static void OnHealthManagerTakeDamage(On.HealthManager.orig_TakeDamage orig, HealthManager self, HitInstance hitInstance)
+        {
+            orig(self, hitInstance);
+
+            if (!_hooksInitialized || self == null || !IsThkSceneActive())
+            {
+                return;
+            }
+
+            GameObject target = self.gameObject;
+            if (target == null || target.name != ThkBossName)
+            {
+                return;
+            }
+
+            EnsureThkMonitor();
+            if (ThkDstabPuppetMonitor.Instance != null)
+            {
+                ThkDstabPuppetMonitor.Instance.HandleAcceptedHit(self, hitInstance);
             }
         }
 
@@ -326,6 +407,25 @@ namespace DebugMod
             bool changed = child.gameObject.activeSelf != active;
             child.gameObject.SetActive(active);
             return changed;
+        }
+
+        private static void EnsureThkMonitor()
+        {
+            if (ThkDstabPuppetMonitor.Instance != null)
+            {
+                return;
+            }
+
+            GameObject monitorObject = GameObject.Find(ThkMonitorObjectName);
+            if (monitorObject == null)
+            {
+                monitorObject = new GameObject(ThkMonitorObjectName);
+            }
+
+            if (monitorObject.GetComponent<ThkDstabPuppetMonitor>() == null)
+            {
+                monitorObject.AddComponent<ThkDstabPuppetMonitor>();
+            }
         }
     }
 }

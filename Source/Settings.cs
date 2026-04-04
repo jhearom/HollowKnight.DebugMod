@@ -58,6 +58,10 @@ namespace DebugMod
 
         public bool SaveStateGlitchFixes = true;
 
+        public bool ThkDstabPuppetReproAssistEnabled = false;
+
+        public bool ThkDstabPuppetTraceEnabled = false;
+
         //TODO Get rid of this variable and implement an actual clear method
         public bool ClearSaveStatePanel = false;
 
