@@ -198,6 +198,7 @@ namespace DebugMod
             SceneWatcher.Init();
             PlayMakerTraceManager.Initialize();
             RoomSpecific.InitializeHooks();
+            SteelSoulDeathRedirect.InitializeHooks();
 
             KeyBindLock = false;
             TimeScaleActive = false;
@@ -346,6 +347,7 @@ namespace DebugMod
             infiniteHP = false;
             infiniteSoul = false;
             noclip = false;
+            SteelSoulDeathRedirect.Reset();
 
             _loadingChar = true;
         }

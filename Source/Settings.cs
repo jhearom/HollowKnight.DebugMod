@@ -58,6 +58,8 @@ namespace DebugMod
 
         public bool SaveStateGlitchFixes = true;
 
+        public bool SteelSoulNormalDeathRedirect = false;
+
         //TODO Get rid of this variable and implement an actual clear method
         public bool ClearSaveStatePanel = false;
 
