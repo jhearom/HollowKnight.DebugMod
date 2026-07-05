@@ -122,6 +122,13 @@ namespace DebugMod
             GameCameras.instance.hudCanvas.gameObject.SetActive(true);
         }
 
+        [BindableMethod(name = "Steel Soul Normal Death", category = "Cheats")]
+        public static void ToggleSteelSoulNormalDeath()
+        {
+            DebugMod.settings.SteelSoulNormalDeathRedirect = !DebugMod.settings.SteelSoulNormalDeathRedirect;
+            Console.AddLine("Steel Soul normal death redirect set to " + DebugMod.settings.SteelSoulNormalDeathRedirect.ToString().ToUpper());
+        }
+
 
     }
 }
